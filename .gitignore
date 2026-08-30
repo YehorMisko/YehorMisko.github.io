@@ -1,0 +1,19 @@
+# This repo publishes straight to https://yehormisko.github.io the moment it is
+# pushed. Anything committed here is PUBLIC. Keep that in mind before un-ignoring.
+
+# Local editor state
+.vs/
+
+# CLIENT-CONFIDENTIAL — Project Horizon design data (195 items, matches the
+# database described on the Horizon page). Must never be published.
+ItemList.json
+
+# Working files that are not part of the site
+Gemini Chat.txt
+Training Material/
+
+# Unreferenced by any page — stray exports
+assets/videos/Sequence 01_5.mp4
+
+# Stray local files
+err.log

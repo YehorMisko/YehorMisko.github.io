@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KCD Switch → PC Save Converter | Yehor Misko</title>
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <style>
+        .tool-meta { display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; margin:0.25rem 0 1rem; }
+        .tool-chip {
+            font-family:'Fira Code', monospace; font-size:0.72rem; letter-spacing:0.02em;
+            color:var(--text-dim); border:1px solid var(--border); border-radius:999px;
+            padding:0.2rem 0.6rem; white-space:nowrap;
+        }
+        .tool-chip.status-shipped { color:var(--accent); border-color:var(--accent); }
+        .usage-shot { max-width:760px; margin:0.75rem 0 0; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+        .usage-shot img { display:block; width:100%; }
+        .compare { display:grid; grid-template-columns:1fr 1fr; gap:0.9rem; margin:1.1rem 0 0.4rem; }
+        .shot { border:1px solid var(--border); border-radius:8px; overflow:hidden; background:#020617; }
+        .shot img { display:block; width:100%; transition:filter .15s ease; }
+        .compare .shot { transition:border-color .15s ease; }
+        .compare .shot img { cursor:zoom-in; }
+        .compare .shot:hover { border-color:var(--accent); }
+        .compare .shot:hover img { filter:brightness(1.07); }
+        /* Full-size hover preview */
+        #shot-preview {
+            position:fixed; inset:0; z-index:9999; pointer-events:none;
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            gap:0.85rem; padding:3vh 2vw;
+            background:rgba(2,6,23,0.93);
+            opacity:0; visibility:hidden;
+            transition:opacity .18s ease, visibility .18s ease;
+        }
+        #shot-preview.on { opacity:1; visibility:visible; }
+        #shot-preview img {
+            display:block; width:auto; height:auto;
+            max-width:min(94vw, 1200px); max-height:82vh;
+            border:1px solid var(--border); border-radius:10px;
+            box-shadow:0 30px 80px rgba(0,0,0,0.65);
+        }
+        #shot-preview .pv-label {
+            font-family:'Fira Code', monospace; font-size:1rem; letter-spacing:0.05em;
+            text-transform:uppercase; color:var(--accent);
+        }
+        @media (hover: none) { #shot-preview { display:none; } .compare .shot img { cursor:default; } }
+        .shot figcaption { font-family:'Fira Code', monospace; font-size:0.72rem; color:var(--text-dim); padding:0.4rem 0.6rem; border-top:1px solid var(--border); }
+        .shot-caption { color:var(--text-dim); font-size:0.9rem; max-width:900px; margin:0.4rem 0 0; }
+        @media (max-width:640px){ .compare{ grid-template-columns:1fr; } }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <span class="logo">Yehor Misko</span>
+            <div class="links">
+                <a href="../index.html" data-i18n="nav_work">Work</a>
+                <a href="../AboutMe.html" data-i18n="nav_about">About Me</a>
+                <a href="../resume.pdf" target="_blank" class="btn-resume" data-i18n="nav_cv">CV</a>
+                <div class="lang-switcher">
+                    <button onclick="setLanguage('en')">EN</button>
+                    <button onclick="setLanguage('cs')">CZ</button>
+                    <button onclick="setLanguage('uk')">UK</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="detail-page">
+        <a href="../index.html" class="back-link">← Back to Gallery</a>
+
+        <header class="detail-header">
+            <h1>KCD Switch &#8594; PC Save Converter</h1>
+            <p class="subtitle">Reverse-engineering an undocumented CryEngine save format | Python · Windows</p>
+            <p class="intro-text">
+                Kingdom Come: Deliverance shipped on the Nintendo Switch, but a Switch save won't load on
+                the PC version: the two builds serialise the same data in completely different ways. This is
+                the story of reconstructing that format byte by byte, and the tool that carries a full Switch
+                playthrough onto PC.
+            </p>
+        </header>
+
+        <section class="breakdown">
+            <div class="showcase-item">
+
+                <div class="tool-meta">
+                    <span class="tool-chip status-shipped">● Working</span>
+                    <span class="tool-chip">Python</span>
+                    <span class="tool-chip">Reverse engineering</span>
+                    <span class="tool-chip">CryEngine XMLCPB</span>
+                    <span class="tool-chip">Win x64</span>
+                </div>
+
+                <div class="usage-shot">
+                    <img src="../assets/images/kcd-conv-drop.png" alt="Dragging a Switch save onto the converter exe" loading="lazy">
+                </div>
+                <p class="shot-caption" style="margin:0.4rem 0 0;">Usage is a drag-and-drop: drop a Switch <code>.whs</code> onto the exe and about 20 seconds later it's a PC save you load from the in-game menu.</p>
+
+                <div class="problem-solution">
+                    <div class="col">
+                        <h3>The Challenge</h3>
+                        <p>The PC and Switch builds of Kingdom Come: Deliverance write their saves differently. The PC uses a <strong>verbose</strong> layout where every field is framed as <code>[u16 tag][u32 size][payload]</code>; the Switch uses a <strong>compact</strong> one that packs the same fields positionally, with no framing at all. The PC executable has no reader for the compact form, so a Switch save doesn't error, it silently starts a new game. Converting means reconstructing every field boundary the compact form leaves implicit, across a world-state table of roughly <strong>2,700 entities</strong> where a single wrong field width desynchronises everything after it. (The outer container is CryEngine's public <em>XMLCPB</em> format, zlib blocks plus an <code>0XBP</code> + MD5 trailer, and was the easy part; the records inside are Warhorse's own and undocumented.)</p>
+                    </div>
+                    <div class="col">
+                        <h3>The Solution</h3>
+                        <p><strong>Differential reverse engineering</strong>, with the game itself as the oracle. The breakthrough was an <strong>engine diff</strong>: load a converted save, immediately save in-game, and compare the converter's output against the file the engine just wrote from the same state. Of ~2,700 entity records, <strong>2,584 come out byte-for-byte identical</strong> to the engine's own output and 50 differ by a single byte, against a measured 3-byte noise floor, a reproducible fidelity check far stronger than any screenshot. That oracle, plus bisection-by-substitution and reading the game's own load log for the verdict, surfaced <strong>8 distinct serialisation defects</strong>, nearly all the same root error: a rule fitted to the one short save that loaded early, which doesn't hold for a late-game playthrough. The tool ships as a 24&nbsp;MB <strong>drag-and-drop exe</strong> (or a CLI), validates its own output before writing, and converts a save in about 20 seconds.</p>
+                    </div>
+                </div>
+
+                <p class="shot-caption" style="margin-top:1.6rem;"><strong>The same save, before and after.</strong> Switch on the left, PC (post-conversion) on the right. <em>Hover any shot to see it full size.</em></p>
+
+                <div class="compare">
+                    <figure class="shot"><img src="../assets/images/kcd-conv-stats-switch.jpg" alt="Switch combat-stats screen" loading="lazy"><figcaption>Switch — combat stats</figcaption></figure>
+                    <figure class="shot"><img src="../assets/images/kcd-conv-stats-pc.jpg" alt="PC combat-stats screen after conversion" loading="lazy"><figcaption>PC — after conversion</figcaption></figure>
+                </div>
+                <p class="shot-caption">Damage dealt (2,768.5), damage taken (779), 8 kills and the full equipped loadout come across identically, the stored, deterministic values. (A couple of <em>derived</em> stats such as Conspicuousness recompute on load and differ slightly, which is expected.)</p>
+
+                <div class="compare">
+                    <figure class="shot"><img src="../assets/images/kcd-conv-menu-switch.jpg" alt="Switch load menu" loading="lazy"><figcaption>Switch — load menu</figcaption></figure>
+                    <figure class="shot"><img src="../assets/images/kcd-conv-menu-pc.jpg" alt="PC load menu" loading="lazy"><figcaption>PC — load menu</figcaption></figure>
+                </div>
+                <p class="shot-caption">The converted save shows up in the PC load list and loads. One honest quirk: a Switch <em>exit</em> save currently comes across re-typed as a manual "Saviour Schnapps" save on PC. That is how the converter writes it today, not something the format requires.</p>
+
+                <div class="compare">
+                    <figure class="shot"><img src="../assets/images/kcd-conv-scene-switch.jpg" alt="Switch in-game scene" loading="lazy"><figcaption>Switch — in world</figcaption></figure>
+                    <figure class="shot"><img src="../assets/images/kcd-conv-scene-pc.jpg" alt="PC in-game scene after conversion" loading="lazy"><figcaption>PC — same spot</figcaption></figure>
+                </div>
+                <p class="shot-caption">Same save, same location and view. The world and your position transfer deterministically; ambient NPCs run on live schedules the game re-simulates on every load (you'll see the same drift reloading a native PC save), so catching them in the exact same place, as here, currently takes a little luck. Full 1:1 moments do happen on some saves, and reducing that variance is ongoing work.</p>
+
+                <p style="color:var(--text-dim); font-size:0.9rem; max-width:820px; margin:0.75rem 0 0;">
+                    <strong>Built with AI assistance, stated plainly:</strong> the code was written with Claude Code over about two months. What was mine was the method and the judgement, the hundreds of manual load tests (the only real oracle is running the game), devising the engine-diff comparison that broke the project open, and catching a silent data loss every automated check had passed: Henry came over from the Switch <em>drunk</em> and loaded on PC <em>sober</em>, a dropped 117-byte record that turned out to carry status effects. In one line: the AI wrote the code; I ran the experiments, chose what to measure, and caught what the code couldn't see.
+                </p>
+
+                <p style="color:var(--text-dim); font-size:0.9rem; max-width:820px; margin:0.5rem 0 0;">
+                    <strong>Credit where it's due:</strong> the container is CryEngine's <em>XMLCPB</em> serializer, whose source Crytek made public, reading it confirmed the outer format byte for byte. Pulling saves off the Switch uses <em>JKSV</em>. No prior Kingdom Come save tooling existed to build on.
+                </p>
+
+                <div class="code-spotlight">
+                    <h4>Format spotlight: a "constant" that wasn't</h4>
+                    <p style="color:var(--text-dim); font-size:0.92rem; max-width:820px; margin:0.25rem 0 1rem;">
+                        Most of the eight defects were the same shape: a value that looked fixed in every save on
+                        hand, and wasn't. A 35-byte run I had hardcoded as a constant inside the player's component
+                        record turned out to end in two length-prefixed frames, and the byte pairs that belong
+                        <em>inside</em> them were being written after them:
+                    </p>
+                    <div class="code-block">
+<pre><code>0x0807 sub-record, 117 bytes  --  the player's component record
+
+  [24 B value][7 B var]
+  [01 e7 94 10][19 zero bytes]
+  [u16 0x0003][u32 6 + 8N]     &#8592; N = how many 8-byte pairs follow
+  [u16 0xaa8b][u32 8N]
+  [N x 8 bytes]                &#8592; each pair is [u32 2][float]
+  [TLV blocks]                 &#8592; 0x11c4 = 3 floats, 0x0310 = u32, 0x0311 = u8</code></pre>
+                    </div>
+                    <p style="color:var(--text-dim); font-size:0.92rem; max-width:820px; margin:1rem 0 0;">
+                        I never recovered names for tags <code>0x0003</code> and <code>0xaa8b</code>: they are
+                        Warhorse's own ids and nothing public maps them. What is provable is the arithmetic. The
+                        two lengths are always <code>6 + 8N</code> and <code>8N</code>, so those four bytes and
+                        those four bytes are frame headers over the pairs that follow. The pairs themselves decode
+                        cleanly as a <code>u32</code> and a <code>float</code>, and the floats are
+                        <code>+FLT_MAX</code> and <code>-FLT_MAX</code>, which is what an untouched min/max range
+                        looks like before anything has been written into it.
+                    </p>
+                    <p style="color:var(--text-dim); font-size:0.92rem; max-width:820px; margin:1.25rem 0 0.75rem;">
+                        The bug is two bytes wide. Below, the same record from two saves written about eight
+                        seconds apart: mine, and the game's own:
+                    </p>
+                    <div class="code-block">
+<pre><code>bytes 54..70 of 117
+
+broken   03 00 | 06 00 00 00 | 8b aa | 00 00 00 00 | 02 00 00 00 ff ff 7f 7f
+                  ^^ "6"                ^^ "0"        16 bytes inside no frame
+
+engine   03 00 | 16 00 00 00 | 8b aa | 10 00 00 00 | 02 00 00 00 ff ff 7f 7f
+                  ^^ 6 + 8x2            ^^ 8x2       the same 16 bytes, framed</code></pre>
+                    </div>
+                    <p style="color:var(--text-dim); font-size:0.92rem; max-width:820px; margin:1rem 0 0;">
+                        <code>6 + 8&#215;2 = 22 = 0x16</code>, <code>8&#215;2 = 16 = 0x10</code>. Every save I had at
+                        the time held <code>N = 0</code>, so both lengths sat at their empty values and read as part
+                        of the constant. The emitter kept writing that empty-case header and appending the pairs
+                        after it, so both frames declared themselves empty while <code>8N</code> bytes trailed and
+                        the PC reader walked off the end. Framing them correctly also revived a record that had been
+                        dropped as "unencodable" for weeks, the one carrying Henry's status effects.
+                    </p>
+                    <p style="color:var(--text-dim); font-size:0.92rem; max-width:820px; margin:1rem 0 0;">
+                        The comparison is a stronger check than it looks. The build that produced the engine's save
+                        had dropped this record entirely, so the game rebuilt it from defaults with no input from
+                        me: those frame headers are the engine's own opinion, and the framing matches mine byte for
+                        byte. The only difference across the whole record is the <code>0x11c4</code> triple, where
+                        mine carries the values off the Switch (16.87 / 2.55 / 72.5) and the engine wrote its
+                        defaults (20.0 / 0.0 / 100.0). That difference is expected, not a defect.
+                    </p>
+                </div>
+
+                <!-- TOOL LINKS: add the GitHub repo link here once the source is public. -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 Yehor Misko</p>
+            <div class="socials">
+                <a href="mailto:yehor.misko@gmail.com">yehor.misko@gmail.com</a>
+                <a href="https://github.com/YehorMisko">GitHub</a>
+                <a href="https://www.linkedin.com/in/yehor-misko/" target="_blank">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Hover a shot to see it full size with its caption.
+        (function () {
+            if (!window.matchMedia('(hover: hover)').matches) return;
+            const shots = document.querySelectorAll('.compare .shot');
+            if (!shots.length) return;
+
+            const pv = document.createElement('div');
+            pv.id = 'shot-preview';
+            const label = document.createElement('span');
+            label.className = 'pv-label';
+            const big = document.createElement('img');
+            big.alt = '';
+            pv.append(label, big);
+            document.body.appendChild(pv);
+
+            shots.forEach(shot => {
+                const img = shot.querySelector('img');
+                const cap = shot.querySelector('figcaption');
+                if (!img) return;
+                shot.addEventListener('mouseenter', () => {
+                    big.src = img.currentSrc || img.src;
+                    label.textContent = cap ? cap.textContent : '';
+                    pv.classList.add('on');
+                });
+                shot.addEventListener('mouseleave', () => pv.classList.remove('on'));
+            });
+        })();
+    </script>
+
+    <script src="../translations.js"></script>
+    <script>
+        function setLanguage(lang) {
+            localStorage.setItem('preferredLang', lang);
+            if (!translations[lang]) return;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) el.innerHTML = translations[lang][key];
+            });
+            document.querySelectorAll('.lang-switcher button').forEach(btn => {
+                btn.style.color = btn.textContent.toLowerCase().replace('cz','cs') === lang ? 'var(--accent)' : 'var(--text-dim)';
+            });
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage(localStorage.getItem('preferredLang') || 'en');
+        });
+    </script>
+</body>
+</html>

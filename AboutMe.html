@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Me | Yehor Misko</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Fira+Code&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <span class="logo">Yehor Misko</span>
+            <div class="links">
+                <a href="index.html" data-i18n="nav_work">Work</a>
+                <a href="AboutMe.html" class="active" data-i18n="nav_about">About Me</a>
+                <a href="resume.pdf" target="_blank" class="btn-resume" data-i18n="nav_cv">CV</a>
+                
+                <div class="lang-switcher">
+                    <button onclick="setLanguage('en')">EN</button>
+                    <button onclick="setLanguage('cs')">CZ</button>
+                    <button onclick="setLanguage('uk')">UK</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="about-container">
+        <header class="about-profile-header">
+            <div class="profile-photo-container">
+                <img src="assets/images/yehor.jpg" alt="Yehor Misko" class="profile-photo">
+            </div>
+            <div class="profile-intro">
+                <h1 data-i18n="about_hero">Yehor Misko</h1>
+                <p class="subtitle" data-i18n="about_subtitle">Zhytomyr, Ukraine. Working remotely, UTC+2.</p>
+            </div>
+        </header>
+
+        <div class="about-content">
+            <div class="text-block">
+                <h3 data-i18n="about_path_title">Current Work & Education</h3>
+                <p data-i18n="about_path_1">I teach Computer Science labs and practicals at Zhytomyr Ivan Franko State University, a part-time teaching load, and I'm a <strong>PhD candidate</strong> there. My research area is replication in game engines, the same problem space as the server-authoritative multiplayer I built into Project Horizon. Neither is a heavy load and my schedule is built around project work: <strong>I'm available now for contract work, part-time or full-time.</strong></p>
+
+                <p data-i18n="about_path_2">I spent over two years as a programmer on <strong>Project Horizon</strong>. Most of that work was taking systems that were never built to talk to each other, a survival framework and a stack of marketplace plugins, and making them behave like one game in networked multiplayer.</p>
+
+                <h3 data-i18n="about_phi_title">Approach to Development</h3>
+                <p data-i18n="about_phi_desc">Speedrunning is where I learned how to work. A run is constant on-the-fly problem solving: the route breaks, something doesn't behave the way it did last attempt, and you have to diagnose it and adapt while the clock is running. It also teaches you to measure instead of assume. That is how I debug: test against the real thing, not against what I think the code does. On the KCD save converter that meant hundreds of manual load tests, because actually running the game was the only check that told the truth.</p>
+
+                <h3 data-i18n="about_games_title">Background & Interests</h3>
+<p data-i18n="about_games_desc">
+    I've played games since I was five, and at some point I started taking them apart instead of just finishing them.
+    <strong>Kingdom Come: Deliverance</strong> is the clearest case: I played it, then modded it, then ended up
+    reverse-engineering its save format.
+    I don't speedrun competitively any more, but I still run a charity marathon once a year.
+</p>
+            </div>
+
+            <div class="stats-sidebar">
+                <h3 data-i18n="about_sidebar_1">Technical Profile</h3>
+                <ul>
+                    <li data-i18n="role_1"><strong>Assistant Lecturer:</strong> CS Dept.</li>
+                    <li data-i18n="role_2"><strong>PhD Candidate:</strong> Engine Replication</li>
+                    <li data-i18n="role_3"><strong>Dev Specialty:</strong> UE5 (C++/BPs) & Unity (C#)</li>
+                </ul>
+
+                <h3 data-i18n="about_sidebar_2">Personal</h3>
+                <p data-i18n="about_hobby_1"><strong>Music:</strong> Music school graduate. I spent two years in a band as a drummer, where I also handled <strong>recording, producing, and mixing</strong>.</p>
+                    
+                <p data-i18n="about_hobby_2"><strong>Physical:</strong> Basketball team captain, it's where a lot of my discipline and teamwork come from. I skate too.</p>
+
+                <div class="social-links-sidebar">
+                    <a href="mailto:yehor.misko@gmail.com">yehor.misko@gmail.com</a>
+                    <a href="https://www.linkedin.com/in/yehor-misko/" target="_blank">LinkedIn</a>
+                    <a href="https://github.com/YehorMisko" target="_blank">GitHub</a>
+                    <a href="https://www.speedrun.com/users/JaydenOwem" target="_blank">Speedrun.com</a>
+                    <a href="https://www.youtube.com/@e-kluk" target="_blank">YouTube</a>   
+                    <a href="https://www.twitch.tv/jayden_owem" target="_blank">Twitch</a>
+                    
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 Yehor Misko</p>
+            <div class="socials">
+                <a href="mailto:yehor.misko@gmail.com">yehor.misko@gmail.com</a>
+                <a href="https://github.com/YehorMisko">GitHub</a>
+                <a href="https://www.linkedin.com/in/yehor-misko/" target="_blank">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="translations.js"></script>
+    <script>
+        function setLanguage(lang) {
+            const mainContent = document.querySelector('main');
+            mainContent.classList.add('lang-transition');
+
+            setTimeout(() => {
+                localStorage.setItem('preferredLang', lang);
+                if (!translations[lang]) return;
+
+                document.querySelectorAll('[data-i18n]').forEach(element => {
+                    const key = element.getAttribute('data-i18n');
+                    if (translations[lang][key]) {
+                        element.innerHTML = translations[lang][key];
+                    }
+                });
+
+                document.querySelectorAll('.lang-switcher button').forEach(btn => {
+                    btn.style.color = btn.textContent.toLowerCase().replace('cz','cs') === lang ? 'var(--accent)' : 'var(--text-dim)';
+                });
+
+                mainContent.classList.remove('lang-transition');
+            }, 300);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('preferredLang') || 'en';
+            setLanguage(savedLang);
+        });
+    </script>
+</body>
+</html>

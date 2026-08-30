@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tools & Experiments | Yehor Misko</title>
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <style>
+        /* scoped helpers for the tools page */
+        .tool-meta { display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; margin:0.25rem 0 1rem; }
+        .tool-chip {
+            font-family:'Fira Code', monospace; font-size:0.72rem; letter-spacing:0.02em;
+            color:var(--text-dim); border:1px solid var(--border); border-radius:999px;
+            padding:0.2rem 0.6rem; white-space:nowrap;
+        }
+        .tool-chip.status-shipped { color:var(--accent); border-color:var(--accent); }
+        .tool-chip.status-progress { color:#e0a63c; border-color:#e0a63c; }
+        .tool-links { display:flex; flex-wrap:wrap; gap:0.75rem; margin-top:1.25rem; }
+        .tool-links a { font-size:0.85rem; }
+        /* converter screenshot galleries */
+        .usage-shot { max-width:760px; margin:0.75rem 0 0; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+        .usage-shot img { display:block; width:100%; }
+        .compare { display:grid; grid-template-columns:1fr 1fr; gap:0.9rem; margin:1.1rem 0 0.4rem; }
+        .shot { border:1px solid var(--border); border-radius:8px; overflow:hidden; background:#020617; }
+        .shot img { display:block; width:100%; }
+        .shot figcaption { font-family:'Fira Code', monospace; font-size:0.72rem; color:var(--text-dim); padding:0.4rem 0.6rem; border-top:1px solid var(--border); }
+        .shot-caption { color:var(--text-dim); font-size:0.9rem; max-width:900px; margin:0.4rem 0 0; }
+        @media (max-width:640px){ .compare{ grid-template-columns:1fr; } }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <span class="logo">Yehor Misko</span>
+            <div class="links">
+                <a href="../index.html" data-i18n="nav_work">Work</a>
+                <a href="../AboutMe.html" data-i18n="nav_about">About Me</a>
+                <a href="../resume.pdf" target="_blank" class="btn-resume" data-i18n="nav_cv">CV</a>
+                <div class="lang-switcher">
+                    <button onclick="setLanguage('en')">EN</button>
+                    <button onclick="setLanguage('cs')">CZ</button>
+                    <button onclick="setLanguage('uk')">UK</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="detail-page">
+        <a href="../index.html" class="back-link">← Back to Gallery</a>
+
+        <header class="detail-header">
+            <h1>Tools &amp; Experiments</h1>
+            <p class="subtitle">Game mods · reverse engineering · utilities | Windows · C++ / Lua / Python</p>
+            <p class="intro-text">
+                A running set of side projects: small, shipped tools that mostly exist because I wanted
+                something that didn't exist yet. They lean into the parts of programming the game work
+                doesn't always reach: native code, reverse engineering a closed format, and shipping to
+                real users who then file real bug reports. Each one below is a short account of the actual
+                problem and how it was solved, with the source linked.
+            </p>
+        </header>
+
+        <section class="breakdown">
+
+            <!-- ============================ 01 · KCD1 PERMADEATH ============================ -->
+            <div class="showcase-item">
+                <div class="showcase-header">
+                    <span class="showcase-number">01</span>
+                    <h2>KCD Permadeath: a native mod that works around a sandboxed scripting API</h2>
+                </div>
+
+                <div class="tool-meta">
+                    <span class="tool-chip status-shipped">● Shipped</span>
+                    <span class="tool-chip">C++17</span>
+                    <span class="tool-chip">CryEngine Lua</span>
+                    <span class="tool-chip">Win x64</span>
+                    <span class="tool-chip">Nexus + GitHub</span>
+                </div>
+
+                <div class="showcase-visual">
+                    <div class="video-wrapper">
+                        <video autoplay muted loop playsinline class="showcase-video">
+                            <source src="../assets/videos/kcd-permadeath.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                </div>
+
+                <div class="problem-solution">
+                    <div class="col">
+                        <h3>The Challenge</h3>
+                        <p>Kingdom Come: Deliverance 1 is a save-scumming game with no permadeath option, and its scripting API isn't built to add one. The engine's Lua has <strong>no file I/O</strong>, so a "lives" counter can't survive the death-and-reload it exists to police. The game <strong>never records which save you loaded</strong>, so "this run is over" has no subject. And the death event isn't exposed to scripts at all. Every obvious approach is a dead end.</p>
+                    </div>
+                    <div class="col">
+                        <h3>The Solution</h3>
+                        <p>I built a two-part mod that talks to <em>itself</em> through the filesystem. A Lua script detects death and writes marker strings into the game's own log; a native <strong>C++ DLL</strong>, loaded as a proxy for a vendor DLL the game already pulls in, tails that log, counts lives, and on the final death hooks the game's game-over function so it shows the real <em>ending</em> screen, then archives that save folder (<strong>moved, never deleted</strong>). Surviving a reload uses a technique from zhiletka's KCD2 permadeath mod, which I credit in full: the DLL writes a console command to disk and the script runs it via <code>exec</code>, the only channel that persists across a load.</p>
+                    </div>
+                </div>
+
+                <div class="code-spotlight">
+                    <h4>Code spotlight: patching a function that moves between game builds</h4>
+                    <p style="color:var(--text-dim); font-size:0.92rem; max-width:820px; margin:0.25rem 0 1rem;">
+                        The game-over function lives at a <em>different address</em> in the Steam, Epic and GOG
+                        builds of <code>WHGame.dll</code>, same game version, different binaries. An early
+                        release hardcoded one address and, on Epic, wrote a 15-byte jump into the middle of an
+                        unrelated function; it didn't crash purely by luck. The fix is to stop trusting addresses:
+                        scan the <code>.text</code> section for the function's first 32 bytes and <strong>refuse
+                        to patch unless there's exactly one match</strong>. On an unknown build it declines and the
+                        mod degrades to the ordinary death screen instead of corrupting the process.
+                    </p>
+                    <div class="code-container collapsed">
+                        <div class="code-block">
+<pre><code class="language-cpp">// Find the game-over function by SIGNATURE, not by a hardcoded address --
+// because Steam / Epic / GOG each ship a different WHGame.dll.
+unsigned char* find_trigger_game_over(uintptr_t base)
+{
+    const auto* dos = reinterpret_cast&lt;const IMAGE_DOS_HEADER*&gt;(base);
+    const auto* nt  = reinterpret_cast&lt;const IMAGE_NT_HEADERS64*&gt;(base + dos-&gt;e_lfanew);
+
+    constexpr size_t kSigLen = sizeof(kSigTriggerGameOver);   // 32-byte fingerprint
+    unsigned char* found = nullptr;
+    int hits = 0;
+
+    const auto* sec = IMAGE_FIRST_SECTION(nt);
+    for (int i = 0; i &lt; nt-&gt;FileHeader.NumberOfSections && hits &lt; 2; ++i)
+    {
+        if (memcmp(sec[i].Name, ".text", 5) != 0) continue;   // code section only
+
+        auto* start     = reinterpret_cast&lt;unsigned char*&gt;(base + sec[i].VirtualAddress);
+        const size_t len = sec[i].Misc.VirtualSize;
+
+        for (size_t off = 0; off + kSigLen &lt;= len; ++off)
+        {
+            if (start[off] != kSigTriggerGameOver[0])          continue;  // cheap reject
+            if (memcmp(start + off, kSigTriggerGameOver, kSigLen) != 0) continue;
+            if (++hits &gt; 1) break;                              // a 2nd match = ambiguous
+            found = start + off;
+        }
+    }
+
+    if (hits != 1) {                    // 0 = unrecognised build, 2 = ambiguous
+        debug_log("game-over signature: " + std::to_string(hits) +
+                  " matches -- refusing to patch this build of WHGame.dll");
+        return nullptr;                 // fail safe: no patch, normal death screen
+    }
+    return found;
+}</code></pre>
+                        </div>
+                        <button class="expand-btn" onclick="toggleCode(this)">Show Full Code</button>
+                    </div>
+                </div>
+
+                <div class="tool-links">
+                    <a href="https://github.com/YehorMisko/kcd1-permadeath" class="btn-secondary" target="_blank">GitHub Repository</a>
+                    <a href="https://www.nexusmods.com/kingdomcomedeliverance/mods/2326" class="btn-secondary" target="_blank">Nexus Mods</a>
+                </div>
+            </div>
+
+            <!-- ============================ 02 · WOW ASCENSION CZECH LOCALIZATION ============================ -->
+            <div class="showcase-item">
+                <div class="showcase-header">
+                    <span class="showcase-number">02</span>
+                    <h2>WoW Ascension: a Czech localization for a launcher-locked private server</h2>
+                </div>
+
+                <div class="tool-meta">
+                    <span class="tool-chip status-shipped">● Shipped</span>
+                    <span class="tool-chip">Lua</span>
+                    <span class="tool-chip">Python</span>
+                    <span class="tool-chip">WoW 3.3.5a addon</span>
+                    <span class="tool-chip">DBC reverse engineering</span>
+                    <span class="tool-chip">GitHub</span>
+                </div>
+
+                <div class="problem-solution">
+                    <div class="col">
+                        <h3>The Challenge</h3>
+                        <p>Project Ascension, a heavily modified World of Warcraft (WotLK 3.3.5a) server, ships English-only. The obvious way to translate a WoW client, patching the text out of its <code>MPQ</code> data files, doesn't survive here: Ascension's launcher manages those files and reverts any edit on the next start. Anything meant to stick has to go through the <strong>addon API</strong> instead. And the one thing an addon <em>can't</em> reach, the spell tooltips baked into <code>Spell.dbc</code>, can't simply be swapped for the community Czech file either: Ascension's <code>Spell.dbc</code> holds ~87,000 rows to the Czech file's ~50,000, so a wholesale replace would delete ~37,000 custom Ascension spells and break the client.</p>
+                    </div>
+                    <div class="col">
+                        <h3>The Solution</h3>
+                        <p>An addon-only Czech layer that installs by copying a folder and uninstalls by deleting it: no client files touched, fully reversible, and it works on any 3.3.5a server, not just Ascension. On top of the community base translation I layer my own <strong>hand-checked quest fixes</strong> for the 1-30 starting zones, corrected against Ascension's live quest database from real playtesting. For the tooltip text an addon can't reach, a set of <strong>Python tools</strong> handles the binary side: a localization-hook generator that only <em>assigns</em> keys (so any untranslated string keeps its English and nothing goes missing) with <code>%s</code>/<code>%d</code> placeholder-safety checks, and a <code>Spell.dbc</code> merger that overlays Czech onto Ascension's own file by row ID and appends to the string block so every untouched byte offset stays identical.</p>
+                    </div>
+                </div>
+
+                <p style="color:var(--text-dim); font-size:0.9rem; max-width:820px; margin:0.75rem 0 0;">
+                    <strong>Credit where it's due:</strong> the base Czech <em>text</em> is community work I package and credit, not my own translation: it comes from <a href="https://wowpreklad.zdechov.net/" target="_blank">wowpreklad.zdechov.net</a> (export 37), and all credit for that base translation belongs to that project. What's mine is adapting and packaging it for Ascension, the hand-checked 1-30 quest fixes (my own translation, done while learning Czech), and the Python build and merge tooling below.
+                </p>
+
+                <div class="compare" style="max-width:820px;">
+                    <figure class="shot"><img src="../assets/images/wow-quest-en.jpg" alt="Ascension quest dialogue in English, addon disabled" loading="lazy"><figcaption>Addon off: English</figcaption></figure>
+                    <figure class="shot"><img src="../assets/images/wow-quest-cz.jpg" alt="The same Ascension quest dialogue in Czech with the addon enabled" loading="lazy"><figcaption>Addon on: Czech</figcaption></figure>
+                </div>
+                <p class="shot-caption">The same quest from the same NPC, addon off and on. The quest title and the full dialogue body are swapped at runtime through the addon API, down to the reward value staying identical (316 XP). No client file is modified, so the launcher has nothing to revert on the next start.</p>
+
+                <div class="code-spotlight">
+                    <h4>Code spotlight: merging Czech into an 87,000-row DBC without deleting custom content</h4>
+                    <p style="color:var(--text-dim); font-size:0.92rem; max-width:820px; margin:0.25rem 0 1rem;">
+                        A WoW <code>.dbc</code> is a flat binary table plus a string block; localized text is an
+                        offset into that block. Ascension's <code>Spell.dbc</code> carries tens of thousands of
+                        custom spells the Czech export has never seen, so the fix is to <strong>merge, not
+                        replace</strong>: index the Czech rows by ID, and for every Ascension row that shares an
+                        ID, append the Czech string to the existing block and re-point just that one field.
+                        Append-only means every offset the tool doesn't touch stays byte-identical, and unmatched
+                        custom spells keep their English text.
+                    </p>
+                    <div class="code-container collapsed">
+                        <div class="code-block">
+<pre><code class="language-python"># Overlay Czech text onto Ascension's OWN Spell.dbc, preserving custom content.
+# Ascension's file has 87,375 rows to the Czech file's 49,839 -- a wholesale
+# swap would delete ~37,500 custom spells. So merge by row ID and APPEND strings,
+# leaving every offset this tool doesn't touch byte-identical.
+
+def merge_table(base_path, cz_path, out_path, fields):
+    base = DBC(base_path)          # Ascension's DBC stays the base
+    cz   = DBC(cz_path)            # the Czech DBC is only a text source
+
+    cz_rows = {}                   # index the Czech rows by their ID (field 0)
+    for i in range(cz.rc):
+        cz_rows[cz.u32(i, 0)] = i
+
+    dedup = {}
+    for i in range(base.rc):
+        rid = base.u32(i, 0)
+        j = cz_rows.get(rid)
+        if j is None:              # a custom Ascension spell -> leave it English
+            continue
+        for f in fields:           # Name, Rank, Description, AuraDescription
+            text = cz.s(cz.u32(j, f))
+            if not text or not has_czech(text):
+                continue
+            off = dedup.get(text)
+            if off is None:
+                off = base.add_string(text)   # append to the string block
+                dedup[text] = off
+            base.set_u32(i, f, off)           # re-point only this field
+
+    base.save(out_path)</code></pre>
+                        </div>
+                        <button class="expand-btn" onclick="toggleCode(this)">Show Full Code</button>
+                    </div>
+                </div>
+
+                <div class="tool-links">
+                    <a href="https://github.com/YehorMisko/ascension-translations" class="btn-secondary" target="_blank">GitHub Repository</a>
+                </div>
+            </div>
+
+            <!-- ============================ 03 · WAR IN THE NORTH ULTRAWIDE ============================ -->
+            <div class="showcase-item">
+                <div class="showcase-header">
+                    <span class="showcase-number">03</span>
+                    <h2>War in the North: 21:9 / 32:9 for a game that hardcodes 16:9</h2>
+                </div>
+
+                <div class="tool-meta">
+                    <span class="tool-chip status-shipped">● Shipped</span>
+                    <span class="tool-chip">Python</span>
+                    <span class="tool-chip">Win x64</span>
+                    <span class="tool-chip">EXE binary patching</span>
+                    <span class="tool-chip">GitHub</span>
+                </div>
+
+                <div class="problem-solution">
+                    <div class="col">
+                        <h3>The Challenge</h3>
+                        <p><em>The Lord of the Rings: War in the North</em> (the Aspyr Legacy Edition on Steam) hardcodes a whitelist of four aspect ratios and throws away every display mode that isn't one of them, so ultrawide resolutions never even reach the menu. Three more places in the executable assume 16:9 on top of that. And even once a 21:9 mode is forced in, the game is <strong>Vert-</strong>: it keeps the 16:9 horizontal view and crops the top and bottom away, so the extra width costs you picture instead of adding any, while the HUD gets sliced off at the screen edges.</p>
+                    </div>
+                    <div class="col">
+                        <h3>The Solution</h3>
+                        <p>A patcher that makes <strong>13 verified byte patches</strong> to <code>witn.exe</code>. Two legacy 4:3/5:4 entries in the aspect whitelist are swapped for ultrawide and the match tolerance widened, so the whole 21:9/32:9 family passes. The GUI canvas and camera FOV math are rewritten to <code>min(aspect, 16/9)</code>, which leaves everything at or below 16:9 <strong>bit-for-bit identical</strong> to the stock game and turns wider aspects into <strong>Hor+</strong>: the vertical view stays put and the extra width becomes extra world at the sides, with the HUD re-anchored so nothing is clipped. Every byte range is checked against the known build (SHA256-verified exe) before a single write, the original is kept as <code>witn.exe.orig</code>, and reverting is a file copy. The README is honest about what's left: the character-select camera is still stretched, shadows fade a little short of the far edges, and 4:3/5:4 modes are dropped because the whitelist is a fixed-size array with no room to add to.</p>
+                    </div>
+                </div>
+
+                <div class="compare" style="grid-template-columns:1fr;">
+                    <figure class="shot"><img src="../assets/images/witn-21-9-unpatched.jpg" alt="21:9 before the FOV fix" loading="lazy"><figcaption>3440×1440, unpatched: the extra width costs picture (Vert-)</figcaption></figure>
+                    <figure class="shot"><img src="../assets/images/witn-21-9-patched.jpg" alt="21:9 after the patch" loading="lazy"><figcaption>3440×1440, patched: same spot, same vertical view, more world (Hor+)</figcaption></figure>
+                </div>
+                <p class="shot-caption">The same location at the same resolution, before and after. Unpatched, a 21:9 screen shows exactly what 16:9 does and crops the top and bottom away; patched, the vertical view matches 16:9 and the extra width becomes extra world at the sides.</p>
+
+                <div class="code-spotlight">
+                    <h4>Code spotlight: writing into a checksum-guarded settings file</h4>
+                    <p style="color:var(--text-dim); font-size:0.92rem; max-width:820px; margin:0.25rem 0 1rem;">
+                        The exe patches are the headline; this is a smaller, self-contained piece. If the game has
+                        a resolution saved that your monitor can't show, the menu becomes hard to escape, so the
+                        patcher can write one straight into <code>GameSettings.dat</code>. That file guards itself
+                        with a <code>CRC32</code> over its own body, so you can't just poke new numbers in, the
+                        game rejects a file whose checksum doesn't match. The fix is to validate the existing
+                        checksum first (refuse if it's already off, rather than make it worse), write the
+                        resolution, then recompute and repair the CRC.
+                    </p>
+                    <div class="code-container collapsed">
+                        <div class="code-block">
+<pre><code class="language-python"># GameSettings.dat guards itself with a CRC32 over its own body:
+#   0x00  uint32  crc32 of everything from 0x04 to EOF
+#   0x04  uint32  version (9)
+#   0x2C  uint32  width      0x30  uint32  height
+
+def cmd_set_res(args):
+    with open(GAME_SETTINGS, "rb") as fh:
+        buf = bytearray(fh.read())
+
+    ver = struct.unpack_from("&lt;I", buf, 0x04)[0]
+    if ver != 9:
+        sys.exit("Unexpected GameSettings.dat version, not touching it.")
+
+    # refuse if the file is already corrupt; don't make it worse
+    if struct.unpack_from("&lt;I", buf, 0x00)[0] != (zlib.crc32(buf[4:]) &amp; 0xFFFFFFFF):
+        sys.exit("GameSettings.dat checksum does not validate, not touching it.")
+
+    struct.pack_into("&lt;II", buf, 0x2C, args.width, args.height)              # set resolution
+    struct.pack_into("&lt;I",  buf, 0x00, zlib.crc32(buf[4:]) &amp; 0xFFFFFFFF)   # repair the CRC
+
+    with open(GAME_SETTINGS, "wb") as fh:
+        fh.write(buf)</code></pre>
+                        </div>
+                        <button class="expand-btn" onclick="toggleCode(this)">Show Full Code</button>
+                    </div>
+                </div>
+
+                <div class="tool-links">
+                    <a href="https://github.com/YehorMisko/war-in-the-north-ultrawide" class="btn-secondary" target="_blank">GitHub Repository</a>
+                </div>
+            </div>
+
+            <!-- ============================ MORE TOOLS: scaffold, pending briefs ============================
+                 Candidate additional entries (confirm which to include, then send me a brief for each):
+                   04 · 5:4 resolution mods (for the Galaxy Fold 4)
+                   05 · Jedi Academy: charity-marathon custom skins & models
+                 I'll mirror the 01 structure: Challenge / Solution + (optional) code-or-format spotlight + links.
+            -->
+
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 Yehor Misko</p>
+            <div class="socials">
+                <a href="mailto:yehor.misko@gmail.com">yehor.misko@gmail.com</a>
+                <a href="https://github.com/YehorMisko">GitHub</a>
+                <a href="https://www.linkedin.com/in/yehor-misko/" target="_blank">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-lua.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+    function toggleCode(button) {
+        const container = button.parentElement;
+        const codeBlock = button.previousElementSibling;
+
+        if (container.classList.contains('collapsed')) {
+            container.classList.remove('collapsed');
+            codeBlock.style.maxHeight = codeBlock.scrollHeight + "px";
+            button.textContent = "Show Less";
+        } else {
+            container.classList.add('collapsed');
+            codeBlock.style.maxHeight = "250px";
+            button.textContent = "Show Full Code";
+            codeBlock.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+    </script>
+
+    <script src="../translations.js"></script>
+    <script>
+        // Nav labels only. The write-ups stay in English; this just keeps the
+        // switcher working and remembers the choice for Work / About.
+        function setLanguage(lang) {
+            localStorage.setItem('preferredLang', lang);
+            if (!translations[lang]) return;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) el.innerHTML = translations[lang][key];
+            });
+            document.querySelectorAll('.lang-switcher button').forEach(btn => {
+                btn.style.color = btn.textContent.toLowerCase().replace('cz','cs') === lang ? 'var(--accent)' : 'var(--text-dim)';
+            });
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage(localStorage.getItem('preferredLang') || 'en');
+        });
+    </script>
+</body>
+</html>

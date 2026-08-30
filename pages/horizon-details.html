@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Horizon Deep Dive | Yehor Misko</title>
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* NDA-gated code slot styling (scoped to this page) */
+        .locked-slot {
+            background: var(--bg-darker);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+        .locked-slot .lock-icon { font-size: 1.8rem; display: block; margin-bottom: 0.75rem; }
+        .locked-slot p { color: var(--text-dim); font-size: 0.9rem; max-width: 520px; margin: 0.25rem auto; }
+        .locked-slot .lock-title { color: var(--text-main); font-weight: 700; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <span class="logo">Yehor Misko</span>
+            <div class="links">
+                <a href="../index.html" data-i18n="nav_work">Work</a>
+                <a href="../AboutMe.html" data-i18n="nav_about">About Me</a>
+                <a href="../resume.pdf" target="_blank" class="btn-resume" data-i18n="nav_cv">CV</a>
+                <div class="lang-switcher">
+                    <button onclick="setLanguage('en')">EN</button>
+                    <button onclick="setLanguage('cs')">CZ</button>
+                    <button onclick="setLanguage('uk')">UK</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="detail-page">
+        <a href="../index.html" class="back-link" data-i18n="back_gallery">← Back to Gallery</a>
+
+        <header class="detail-header">
+            <h1 data-i18n="horizon_dt_title">Project Horizon: Systems Integration &amp; Multiplayer</h1>
+            <p class="subtitle" data-i18n="horizon_dt_subtitle">March 2023 - August 2025 | Freelance Programmer | UE5 · Blueprints &amp; Replication</p>
+            <p class="intro-text" data-i18n="horizon_dt_intro">
+                Project Horizon was a two-year client engagement: a co-op survival game built on a
+                commercial survival framework and a library of marketplace systems. My role was to make
+                those separate systems function as one game, and above all to make them work in networked
+                multiplayer. Marketplace systems almost never ship with replication; the core of my work
+                was extending bought single-player systems with server-authoritative networking so every
+                mechanic stayed in sync across a host and connected clients.
+            </p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span data-i18n="horizon_stat_dur_label">Duration</span>
+                    <strong data-i18n="horizon_stat_dur_val">2+ Years</strong>
+                </div>
+                <div class="stat-card">
+                    <span data-i18n="horizon_stat_eng_label">Engine</span>
+                    <strong>Unreal Engine 5</strong>
+                </div>
+                <div class="stat-card">
+                    <span data-i18n="horizon_stat_focus_label">Focus</span>
+                    <strong data-i18n="horizon_stat_focus_val">Multiplayer Integration</strong>
+                </div>
+            </div>
+        </header>
+
+        <section class="breakdown">
+
+            <div class="showcase-item">
+                <div class="showcase-header">
+                    <span class="showcase-number">01</span>
+                    <h2 data-i18n="horizon_s1_title">Modular Clothing &amp; a 195-Item Content Database</h2>
+                </div>
+
+                <div class="showcase-visual">
+                    <div class="video-wrapper">
+                        <!-- Owner-approved feature footage: wardrobe / clothing swap. -->
+                        <video autoplay muted loop playsinline class="showcase-video" poster="../assets/images/horizon-static.jpg">
+                            <source src="../assets/videos/horizon-clothing.mp4" type="video/mp4">
+                        </video>                    </div>
+                </div>
+
+                <div class="problem-solution">
+                    <div class="col">
+                        <h3 data-i18n="challenge_label">The Challenge</h3>
+                        <p data-i18n="horizon_s1_challenge">The wardrobe had to be deep and visible: any garment a player equips should show on the character and stay consistent for everyone in a co-op session. The source clothing assets were static and single-player, and the framework's item system had no concept of the custom data the wardrobe needed.</p>
+                    </div>
+                    <div class="col">
+                        <h3 data-i18n="contribution_label">My Contribution</h3>
+                        <p data-i18n="horizon_s1_contribution">I re-rigged marketplace and static garments onto the character skeleton and built a modular skeletal-mesh swap system that visibly equips clothing and replicates the mesh and material changes to all clients. I authored and integrated a 195-item content database, including a 50+ piece garment wardrobe and a custom melee set, and extended the framework's item struct to carry the extra fields these custom items required. Equipped clothing persists through a save and reload.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="showcase-item">
+                <div class="showcase-header">
+                    <span class="showcase-number">02</span>
+                    <h2 data-i18n="horizon_s2_title">Skill Tree &amp; Progression</h2>
+                </div>
+
+                <div class="showcase-visual">
+                    <div class="video-wrapper">
+                        <!-- Owner-approved feature footage: open skill menu → acquire a perk → effect → replicated on a 2nd client. -->
+                        <video autoplay muted loop playsinline class="showcase-video" poster="../assets/images/horizon-static.jpg">
+                            <source src="../assets/videos/horizon-skilltree.mp4" type="video/mp4">
+                        </video>                    </div>
+                </div>
+
+                <div class="problem-solution">
+                    <div class="col">
+                        <h3 data-i18n="challenge_label">The Challenge</h3>
+                        <p data-i18n="horizon_s2_challenge">The skill-tree plugin the project started from was extremely barebones: little more than a menu that let a player open it and pick acquirable entries. There was no progression behind it: no perks that actually changed how the game played, no XP economy feeding them, and nothing that worked in co-op.</p>
+                    </div>
+                    <div class="col">
+                        <h3 data-i18n="contribution_label">My Contribution</h3>
+                        <p data-i18n="horizon_s2_contribution">I built the progression system out almost entirely myself, on top of that menu shell. I authored the perks and what each one does, wired them into the framework character and its stats (including extending the hunger and thirst systems through them), and built the XP economy that drives unlocks. Then I made the whole thing net-replicated: earning XP and unlocking a perk is validated on the server and mirrored to every client, HUD included, and the whole progression persists through a save and reload.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="showcase-item">
+                <div class="showcase-header">
+                    <span class="showcase-number">03</span>
+                    <h2 data-i18n="horizon_s3_title">Vehicles: Integration, Destruction &amp; Persistence</h2>
+                </div>
+
+                <div class="showcase-visual">
+                    <div class="video-wrapper">
+                        <!-- Owner-approved feature footage: drive → destruction across clients → save/reload persists. -->
+                        <video autoplay muted loop playsinline class="showcase-video" poster="../assets/images/horizon-static.jpg">
+                            <source src="../assets/videos/horizon-vehicles.mp4" type="video/mp4">
+                        </video>                    </div>
+                </div>
+
+                <div class="problem-solution">
+                    <div class="col">
+                        <h3 data-i18n="challenge_label">The Challenge</h3>
+                        <p data-i18n="horizon_s3_challenge">The vehicles came from a marketplace plugin that knew nothing about the survival framework, the zombie AI, the multi-seat system, or the save game. On their own they couldn't take damage from enemies, be destroyed consistently for every player in a co-op session, drop the driver back into the world correctly, or survive a save and reload: all things the survival loop depended on.</p>
+                    </div>
+                    <div class="col">
+                        <h3 data-i18n="contribution_label">My Contribution</h3>
+                        <p data-i18n="horizon_s3_contribution">I turned the vehicle into the hub that ties those systems together. Damage and destruction are server-authoritative and fire across the host and every client at once: an enemy impact drives the car's health down, and on destruction it explodes, ejects its passengers, and swaps to a burnt state for everyone. Entering and exiting is wired into the framework character and its inventory HUD, select cars carry their own trunk storage, and I hooked the vehicle into the save system with new serialization data so cars persist through a reload. The plugin owns the driving physics; the cross-system integration, the replication, and the persistence are mine.</p>
+                    </div>
+                </div>
+
+                <div class="locked-slot">
+                    <span class="lock-icon">🔒</span>
+                    <p class="lock-title" data-i18n="horizon_locked_title">Source code not shown</p>
+                    <p data-i18n="horizon_locked_body">Project Horizon is client-owned work under a confidentiality agreement, so I can't publish the Blueprints or code behind these systems. The footage above is owner-approved, and I'm happy to talk through the implementation (the replication pattern, the save-system hooks, the class structure) in an interview.</p>
+                </div>
+            </div>
+
+            <div class="showcase-item">
+                <div class="showcase-header">
+                    <h2 data-i18n="horizon_other_title">Other Systems I Built and Integrated</h2>
+                </div>
+                <div style="text-align:left; max-width:820px;">
+                    <ul style="color:var(--text-dim); font-size:0.95rem; line-height:1.9; padding-left:1.2rem;">
+                        <li data-i18n="horizon_other_1"><strong>Modular zombies</strong>: skeletal &amp; animation randomization for visual variety, day/night spawners, a full enemy overhaul, AI performance-optimization passes, and separate single-player and multiplayer AI variants.</li>
+                        <li data-i18n="horizon_other_2"><strong>Melee weapons</strong>: adapted a combo-animation pack (which shipped only animations and stub code) into fully working inventory items and equipables, on custom base classes.</li>
+                        <li data-i18n="horizon_other_3"><strong>Droppable loot</strong>: items that drop into the world on death or discard and can be picked back up.</li>
+                        <li data-i18n="horizon_other_4"><strong>Vehicle support tools</strong>: e.g. a server-authoritative refuel can that pours fuel from a player's inventory into a car's tank.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </section>
+
+        <p class="intro-text" style="margin-top:4rem; font-size:0.9rem; opacity:0.8;" data-i18n="horizon_scope_note">
+            Note on scope: Project Horizon is built on the Survival Game Kit framework plus commercial
+            marketplace plugins. The systems above describe my own integration, networking, and content
+            work layered on top of those tools, not authorship of the underlying frameworks.
+        </p>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 Yehor Misko</p>
+            <div class="socials">
+                <a href="mailto:yehor.misko@gmail.com">yehor.misko@gmail.com</a>
+                <a href="https://github.com/YehorMisko">GitHub</a>
+                <a href="https://www.linkedin.com/in/yehor-misko/" target="_blank">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../translations.js"></script>
+    <script>
+        // Nav and body both carry data-i18n and get swapped from translations.js.
+        function setLanguage(lang) {
+            localStorage.setItem('preferredLang', lang);
+            if (!translations[lang]) return;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) el.innerHTML = translations[lang][key];
+            });
+            document.querySelectorAll('.lang-switcher button').forEach(btn => {
+                btn.style.color = btn.textContent.toLowerCase().replace('cz','cs') === lang ? 'var(--accent)' : 'var(--text-dim)';
+            });
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage(localStorage.getItem('preferredLang') || 'en');
+        });
+    </script>
+</body>
+</html>

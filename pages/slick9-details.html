@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slick 9 Deep Dive | Yehor Misko</title>
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <span class="logo">Yehor Misko</span>
+            <div class="links">
+                <a href="../index.html" data-i18n="nav_work">Work</a>
+                <a href="../AboutMe.html" data-i18n="nav_about">About Me</a>
+                <a href="../resume.pdf" target="_blank" class="btn-resume" data-i18n="nav_cv">CV</a>
+                <div class="lang-switcher">
+                    <button onclick="setLanguage('en')">EN</button>
+                    <button onclick="setLanguage('cs')">CZ</button>
+                    <button onclick="setLanguage('uk')">UK</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="detail-page">
+        <a href="../index.html" class="back-link">← Back to Gallery</a>
+
+        <header class="detail-header">
+            <h1>Slick 9: Rapid Prototype Architecture</h1>
+            <p class="subtitle">9 Days | 4 Developers | Role: Gameplay Programmer</p>
+            <p class="intro-text">
+                Nine days, four people, and a movement system as the whole point of the game. My goal was
+                traversal that stayed responsive at speed, built so the movement code stayed separate enough
+                from the jam content that we could keep working on it afterwards.
+            </p>
+
+            <div class="team-credits">
+                <span class="credits-label">Team</span>
+                <div class="credits-list">
+                    <div class="credit-item">
+                        <span class="credit-role">Gameplay Programming &amp; Systems</span>
+                        <span class="credit-name">Yehor Misko</span>
+                    </div>
+                    <div class="credit-item">
+                        <span class="credit-role">Level &amp; Game Design, Custom Materials</span>
+                        <a href="https://www.artstation.com/wolmance" target="_blank" class="credit-name credit-link">Wolmance</a>
+                    </div>
+                    <div class="credit-item">
+                        <span class="credit-role">3D Props</span>
+                        <a href="https://www.artstation.com/sofiia_larchenkova" target="_blank" class="credit-name credit-link">Sofiia Larchenkova</a>
+                    </div>
+                    <div class="credit-item">
+                        <span class="credit-role">Soundtrack</span>
+                        <a href="https://www.youtube.com/@veroowem/videos" target="_blank" class="credit-name credit-link">Vero Owem</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="breakdown">
+            <div class="showcase-item">
+                <div class="showcase-header">
+                    <span class="showcase-number">01</span>
+                    <h2>Momentum-Preserving Wallrun & Traversal</h2>
+                </div>
+
+                <div class="showcase-visual">
+                    <div class="video-wrapper">
+                        <video autoplay muted loop playsinline class="showcase-video">
+                            <source src="../assets/videos/slick9-wallrun.mp4" type="video/mp4">
+                        </video>
+                        <button class="sound-toggle" onclick="toggleSound(this)" title="Toggle sound">🔇</button>
+                    </div>
+                </div>
+
+                <div class="problem-solution">
+                    <div class="col">
+                        <h3>The Challenge</h3>
+                        <p>Unreal's default collision physics kills kinetic energy on wall impact. Under jam time constraints, I needed wallrunning that preserved momentum and chained into jumps, without the complexity of a full custom movement state and its replicated physics overhead.</p>
+                    </div>
+                    <div class="col">
+                        <h3>The Solution</h3>
+                        <p>I subclassed <code>UCharacterMovementComponent</code> and overrode <code>OnMovementUpdated</code> to run a wall scan every tick while <code>IsFalling()</code>. The character never leaves the standard falling state. Wallrun physics are applied as velocity corrections: a <strong>Dot Product</strong> validates wall angle, a <strong>Cross Product</strong> finds the forward tangent, and pre-impact speed from <code>OldVelocity</code> is forcefully restored.</p>
+                    </div>
+                </div>
+
+                
+
+                <div class="code-spotlight">
+                    <h4>Full Implementation (C++)</h4>
+                    <div class="code-container collapsed">
+                        <div class="code-block">
+<pre><code class="language-cpp">// --- 1. ENTRY & MEMORY CHECKS ---
+FVector ViewDir  = CharacterOwner->GetControlRotation().Vector();
+float   LookDot  = FVector::DotProduct(ViewDir, WallHit.Normal);
+// Reject the attach if the camera is pointed too far away from the wall.
+// (Tuned by feel: looser than a "look straight along the wall" check would be.)
+bool bLookOK = LookDot < Stat_WallRunLookThreshold;
+
+bool bIsNewWall = WallHit.GetComponent() != LastWallComponent;
+
+if ((bSameWallWallrun || bIsNewWall) && bLookOK)
+{
+    // Capture "is this the first frame on the wall?" BEFORE flipping the flag,
+    // otherwise the restore below can never run.
+    bool bJustStarted = !bIsWallRunning;
+    bIsWallRunning    = true;
+
+    CurrentWallNormal = WallHit.Normal;
+    LastWallComponent = WallHit.GetComponent();
+
+    // --- 2. SEAMLESS MOMENTUM RESTORATION ---
+    // Only on the entry frame: if the wall impact bled off speed, rebuild it
+    // along the wall so the run feels like it "catches" rather than snags.
+    if (bJustStarted)
+    {
+        float PreImpactSpeed  = OldVelocity.Size2D();
+        float PostImpactSpeed = Velocity.Size2D();
+
+        if (PostImpactSpeed < PreImpactSpeed)
+        {
+            FVector ForwardAlongWall = FVector::CrossProduct(CurrentWallNormal, FVector::UpVector);
+
+            // Flip the tangent if it points against the way we were moving.
+            if (FVector::DotProduct(ForwardAlongWall, OldVelocity) < 0.f)
+            {
+                ForwardAlongWall = -ForwardAlongWall;
+            }
+
+            Velocity = ForwardAlongWall * PreImpactSpeed;
+        }
+    }
+
+    // --- 3. WALL ADHESION PHYSICS ---
+    Velocity.Z = 0.f;                                              // cancel gravity while attached
+    Velocity -= CurrentWallNormal * (Stat_WallStickForce * DeltaSeconds); // gentle inward pull to stay glued
+}
+
+// --- 4. ADDITIVE MOMENTUM CHAINING (DoJump Override) ---
+if (bIsWallRunning)
+{
+    FVector FlatViewDir = CharacterOwner->GetControlRotation().Vector().GetSafeNormal2D();
+    // Aim mostly where the player looks, biased slightly out from the wall so
+    // the jump clears it instead of re-attaching.
+    FVector JumpTrajectory = (FlatViewDir + (CurrentWallNormal * Stat_WallJumpOutwardBias)).GetSafeNormal();
+
+    Velocity += JumpTrajectory * Stat_WallJumpSpeedBoost;
+    WallRunCooldown = Stat_WallRunCooldown;   // brief lockout before we can re-attach
+}</code></pre>
+                        </div>
+                        <button class="expand-btn" onclick="toggleCode(this)">Show Full Code</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="showcase-item">
+                <div class="showcase-header">
+                    <span class="showcase-number">02</span>
+                    <h2>Data-Driven Slope Physics & Momentum Decay</h2>
+                </div>
+
+                <div class="showcase-visual">
+                    <div class="video-wrapper">
+                        <video autoplay muted loop playsinline class="showcase-video">
+                            <source src="../assets/videos/slick9-slope-physics.mp4" type="video/mp4">
+                        </video>
+                        <button class="sound-toggle" onclick="toggleSound(this)" title="Toggle sound">🔇</button>
+                    </div>
+                </div>
+
+                <div class="problem-solution">
+                    <div class="col">
+                        <h3>The Challenge</h3>
+                        <p>Standard Unreal movement is static on inclines. Additionally, exceeding <code>MaxWalkSpeed</code> violently clamps velocity, killing flow. I needed level geometry to actively dictate pacing while keeping physics parameters data-driven.</p>
+                    </div>
+                    <div class="col">
+                        <h3>The Solution</h3>
+                        <p>I wrote a state-aware Master Speed Manager. For slope physics, the system projects <code>DownVector</code> against <code>FloorNormal</code>. I built a <strong>"Soft Cap"</strong> system using <code>FMath::FInterpConstantTo</code> to allow excess momentum to naturally decay.</p>
+                    </div>
+                </div>
+
+                
+
+                <div class="code-spotlight">
+                    <h4>Implementation Breakdown (C++)</h4>
+                    <div class="code-container collapsed">
+                        <div class="code-block">
+<pre><code class="language-cpp">// --- MASTER SPEED & SLIDE MANAGER (runs every tick in OnMovementUpdated) ---
+
+// --- 1. STATE -> TARGET SPEED LIMIT (the "floor" we decay down to) ---
+bool  bIsSliding = IsCrouching();
+float TargetLimit = Stat_GroundMaxSpeed;              // Default run (e.g. 600)
+if      (bIsWallRunning)              TargetLimit = Stat_WallRunSpeed;   // e.g. 1200
+else if (bIsSliding)                 TargetLimit = Stat_CrouchWalkSpeed; // e.g. 300
+if (bIsHorseRiding && !IsFalling())  TargetLimit = Stat_HorseSpeed;
+
+// --- 2. TERRAIN-AWARE SLOPE PHYSICS ---
+float CurrentDecay = Stat_SoftCapDecayRate;
+if (bIsSliding)
+{
+    FVector FloorNormal      = CurrentFloor.HitResult.Normal;
+    FVector GravityDownSlope = FVector::VectorPlaneProject(FVector::DownVector, FloorNormal).GetSafeNormal();
+    float   SlopeDot         = FVector::DotProduct(Velocity.GetSafeNormal(), GravityDownSlope);
+
+    if (SlopeDot > 0.1f)        // DOWNHILL: steer force down the slope, frictionless
+    {
+        Velocity += GravityDownSlope * (Stat_SlideSlopeBoost * SlopeDot) * DeltaSeconds;
+        CurrentDecay = 0.f;
+    }
+    else if (SlopeDot < -0.1f)  // UPHILL: heavy braking
+    {
+        CurrentDecay = Stat_SlideUphillBrake;
+    }
+    else                        // FLAT: light drag
+    {
+        CurrentDecay = Stat_SlideDecayRate;
+    }
+}
+
+// --- 3. UNIVERSAL UPHILL ACCELERATION BOOST (scales with steepness) ---
+float TargetAccel = Stat_GroundAcceleration;
+if (!IsFalling() && VisualSlopeFactor < -0.05f)
+{
+    float HillBoost = FMath::GetMappedRangeValueClamped(
+        FVector2D(-0.05f, -1.0f),   // slight incline -> vertical
+        FVector2D( 1.0f,   3.0f),   // 1x -> 3x power
+        VisualSlopeFactor);
+    TargetAccel *= HillBoost;
+}
+MaxAcceleration = TargetAccel;
+
+// --- 4. THE SOFT CAP: bleed excess speed down smoothly instead of hard-clamping ---
+float CurrentSpeed = Velocity.Size2D();
+if (CurrentSpeed > TargetLimit)
+{
+    float NewSpeedLimit  = FMath::FInterpConstantTo(CurrentSpeed, TargetLimit, DeltaSeconds, CurrentDecay);
+    MaxWalkSpeed         = NewSpeedLimit;
+    MaxWalkSpeedCrouched = NewSpeedLimit; // raise crouch cap so the slide can carry speed
+}
+else
+{
+    MaxWalkSpeed         = Stat_GroundMaxSpeed;
+    MaxWalkSpeedCrouched = Stat_CrouchWalkSpeed;
+}</code></pre>
+                        </div>
+                        <button class="expand-btn" onclick="toggleCode(this)">Show Full Code</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="showcase-item">
+                <div class="showcase-header">
+                    <span class="showcase-number">03</span>
+                    <h2>Runtime Shape-Shifting & Spatial Validation</h2>
+                </div>
+
+                <div class="showcase-visual">
+                    <div class="video-wrapper">
+                        <video autoplay muted loop playsinline class="showcase-video">
+                            <source src="../assets/videos/slick9-transformation.mp4" type="video/mp4">
+                        </video>
+                        <button class="sound-toggle" onclick="toggleSound(this)" title="Toggle sound">🔇</button>
+                    </div>
+                </div>
+
+                <div class="problem-solution">
+                    <div class="col">
+                        <h3>The Challenge</h3>
+                        <p>Dynamically modifying collision geometry is prone to bugs. Transforming into a larger horse entity inside tight corridors can push players out of bounds or crash the movement state.</p>
+                    </div>
+                    <div class="col">
+                        <h3>The Solution</h3>
+                        <p>I wrote a <strong>predictive spatial validation</strong> system using <code>OverlapBlockingTestByChannel</code>. Transformations are safely denied if clearance is insufficient, and state sanitization prevents conflicting physics states.</p>
+                    </div>
+                </div>
+
+                
+
+                <div class="code-spotlight">
+                    <h4>Implementation Breakdown (C++)</h4>
+                    <div class="code-container collapsed">
+                        <div class="code-block">
+<pre><code class="language-cpp">// --- 1. THE SPATIAL VALIDATION CHECK ---
+void AJKAInspCharacter::ToggleHorse(bool bNewState)
+{
+    if (bNewState && !MyMoveComp->bIsHorseRiding)
+    {
+        // --- STATE SANITIZATION: never grow the capsule from an airborne state ---
+        // Summoning mid-air freezes the soft speed-cap until the player uncrouches.
+        // Require solid ground before shape-shifting.
+        if (MyMoveComp->IsFalling())
+        {
+            PlaySound(SummonFailSound);
+            return;
+        }
+
+        // --- PREDICTIVE CLEARANCE: does the taller horse capsule actually fit? ---
+        bool bHitCeiling = GetWorld()->OverlapBlockingTestByChannel(
+            GetActorLocation() + FVector(0, 0, 105.f),
+            FQuat::Identity,
+            ECC_Visibility,
+            FCollisionShape::MakeCapsule(42.f, 192.0f)   // test the shape we're about to become
+        );
+
+        if (bHitCeiling)
+        {
+            PlaySound(SummonFailSound);
+            return;
+        }
+
+        // --- GROW, THEN KEEP THE FEET PLANTED ---
+        // SetCapsuleHalfHeight grows around the CENTER (up AND down), so a naive
+        // resize sinks the lower half into the floor -> fall-through on thin
+        // platforms. Offset UP by the growth to hold the feet where they were.
+        const float GrowAmount = 192.0f - GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+        GetCapsuleComponent()->SetCapsuleHalfHeight(192.0f);
+        AddActorWorldOffset(FVector(0, 0, GrowAmount), false, nullptr, ETeleportType::TeleportPhysics);
+
+        MyMoveComp->SetHorseMode(true);
+    }
+    else if (!bNewState && MyMoveComp->bIsHorseRiding)
+    {
+        // --- THE REVERSION (mirror image: shrink around center, shift DOWN to stay planted) ---
+        const float HeightDiff = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight() - 96.0f;
+        GetCapsuleComponent()->SetCapsuleHalfHeight(96.0f);
+        AddActorWorldOffset(FVector(0, 0, -HeightDiff), false, nullptr, ETeleportType::TeleportPhysics);
+        MyMoveComp->SetHorseMode(false);
+    }
+}</code></pre>
+                        </div>
+                        <button class="expand-btn" onclick="toggleCode(this)">Show Full Code</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 Yehor Misko</p>
+            <div class="socials">
+                <a href="mailto:yehor.misko@gmail.com">yehor.misko@gmail.com</a>
+                <a href="https://github.com/YehorMisko">GitHub</a>
+                <a href="https://www.linkedin.com/in/yehor-misko/" target="_blank">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+    <script>
+    function toggleSound(button) {
+        const video = button.parentElement.querySelector('video');
+
+        if (video.muted) {
+            // Mute all other videos first so audio never overlaps
+            document.querySelectorAll('video').forEach(v => { v.muted = true; });
+            document.querySelectorAll('.sound-toggle').forEach(b => { b.textContent = '🔇'; });
+            video.muted = false;
+            button.textContent = '🔊';
+        } else {
+            video.muted = true;
+            button.textContent = '🔇';
+        }
+    }
+
+    function toggleCode(button) {
+        const container = button.parentElement;
+        const codeBlock = button.previousElementSibling;
+
+        if (container.classList.contains('collapsed')) {
+            container.classList.remove('collapsed');
+            codeBlock.style.maxHeight = codeBlock.scrollHeight + "px";
+            button.textContent = "Show Less";
+        } else {
+            container.classList.add('collapsed');
+            codeBlock.style.maxHeight = "250px";
+            button.textContent = "Show Full Code";
+            codeBlock.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+    </script>
+
+    <script src="../translations.js"></script>
+    <script>
+        // Nav labels only. The write-ups stay in English; this just keeps the
+        // switcher working and remembers the choice for Work / About.
+        function setLanguage(lang) {
+            localStorage.setItem('preferredLang', lang);
+            if (!translations[lang]) return;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) el.innerHTML = translations[lang][key];
+            });
+            document.querySelectorAll('.lang-switcher button').forEach(btn => {
+                btn.style.color = btn.textContent.toLowerCase().replace('cz','cs') === lang ? 'var(--accent)' : 'var(--text-dim)';
+            });
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage(localStorage.getItem('preferredLang') || 'en');
+        });
+    </script>
+</body>
+</html>

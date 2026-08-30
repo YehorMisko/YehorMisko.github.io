@@ -1,0 +1,892 @@
+/* --- Global Variables & Reset --- */
+:root {
+    --bg-dark: #0f172a; /* Deep slate blue */
+    --bg-darker: #020617; /* Near black for sections */
+    --card-bg: #1e293b; /* Lighter slate for cards */
+    --accent: #38bdf8; /* Bright Cyan for tech feel */
+    --accent-hover: #7dd3fc;
+    --text-main: #f8fafc; /* White/Off-white */
+    --text-dim: #94a3b8; /* Muted slate for descriptions */
+    --border: rgba(255, 255, 255, 0.1);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Inter', -apple-system, sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* --- Navigation --- */
+nav {
+    position: sticky;
+    top: 0;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    z-index: 1000;
+    padding: 1rem 0;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: -0.5px;
+}
+
+.links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+    .links a {
+        text-decoration: none;
+        color: var(--text-dim);
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+        .links a:hover, .links a.active {
+            color: var(--accent);
+        }
+
+.btn-resume {
+    background: var(--accent);
+    color: var(--bg-darker) !important;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-weight: 700 !important;
+}
+
+    .btn-resume:hover {
+        background: var(--accent-hover);
+        transform: translateY(-2px);
+    }
+
+/* --- Hero Section --- */
+.hero {
+    padding: 8rem 2rem 4rem;
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+    .hero h1 {
+        font-size: clamp(2.5rem, 8vw, 4rem);
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        font-weight: 800;
+    }
+
+    .hero p {
+        font-size: 1.25rem;
+        color: var(--text-dim);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+/* Availability pill. Scoped to .hero p to outrank the 600px paragraph rule. */
+.hero p.hero-available {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    max-width: none;
+    width: auto;
+    margin: 2.25rem auto 0;
+    padding: 0.65rem 1.4rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--card-bg);
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: var(--text-main);
+}
+.hero p.hero-available a {
+    color: var(--accent);
+    text-decoration: none;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--border);
+}
+.hero p.hero-available a:hover { text-decoration: underline; }
+@media (max-width: 560px) {
+    .hero p.hero-available { border-radius: 14px; }
+    .hero p.hero-available a { border-left: 0; padding-left: 0; }
+}
+.avail-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+    flex: 0 0 auto;
+}
+
+/* --- Work Grid (Bento Style) --- */
+#work {
+    max-width: 1200px;
+    margin: 4rem auto;
+    padding: 0 2rem;
+}
+
+.featured-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+/* Converter card: full width, static image only */
+.project-card.converter { grid-column: 1 / -1; }
+.project-card.converter:hover .static-img { opacity: 1; }
+.plat-label {
+    position: absolute;
+    bottom: 12px;
+    z-index: 3;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #fff;
+    background: rgba(2, 6, 23, 0.72);
+    border: 1px solid var(--border);
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+}
+.plat-switch { left: 16px; }
+.plat-pc { left: calc(50% + 16px); }
+
+.project-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transition: var(--transition);
+}
+
+.card-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
+    padding: 1.75rem 2rem 2rem;
+}
+
+    .card-content h2,
+    .card-content p {
+        width: 100%;
+    }
+
+    .card-content .btn-secondary {
+        margin-top: auto;
+    }
+
+.project-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--accent);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+    .badge.highlight {
+        background: rgba(251, 191, 36, 0.2);
+        color: #fbbf24;
+    }
+
+.btn-secondary {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 0.8rem 1.5rem;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+    .btn-secondary:hover {
+        background: var(--accent);
+        color: var(--bg-darker);
+    }
+
+/* --- Other Projects Grid --- */
+.small-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.mini-card {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+/* Tools & Experiments as a single full-width strip */
+.mini-card.wide-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+    padding: 2.25rem 2.5rem;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.mini-card.wide-card h4 { margin: 0 0 0.4rem; font-size: 1.35rem; }
+.mini-card.wide-card p { margin: 0; }
+.mini-card.wide-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+}
+.wide-card-text { flex: 1 1 340px; }
+.mini-card.wide-card .btn-secondary { margin: 0; flex: 0 0 auto; }
+
+/* Tool names, so the card shows what's behind it */
+.tools-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+.tools-list .tool-chip {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.25rem 0.7rem;
+    white-space: nowrap;
+}
+
+/* --- About Me Page Layout --- */
+.about-container {
+    max-width: 1000px;
+    margin: 6rem auto;
+    padding: 0 2rem;
+}
+
+.about-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 4rem;
+    margin-top: 3rem;
+}
+
+.stats-sidebar {
+    background: var(--bg-darker);
+    padding: 2rem;
+    border-radius: 12px;
+    height: fit-content;
+    border: 1px solid var(--border);
+}
+
+    .stats-sidebar ul {
+        list-style: none;
+        margin-bottom: 2rem;
+    }
+
+    .stats-sidebar li {
+        color: var(--text-dim);
+        margin-bottom: 0.5rem;
+    }
+
+        .stats-sidebar li strong {
+            color: var(--accent);
+        }
+
+blockquote {
+    border-left: 4px solid var(--accent);
+    padding-left: 1.5rem;
+    font-style: italic;
+    font-size: 1.2rem;
+    margin: 2rem 0;
+    color: var(--text-dim);
+}
+
+/* --- Deep Dive / Details Pages --- */
+.detail-page {
+    max-width: 900px;
+    margin: 6rem auto;
+    padding: 0 2rem;
+}
+
+.back-link {
+    text-decoration: none;
+    color: var(--accent);
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 2rem;
+}
+
+.code-block {
+    background: var(--bg-darker);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border: 1px solid var(--border);
+    font-family: 'Fira Code', monospace;
+}
+
+    .code-block pre {
+        overflow-x: auto;
+        color: #e2e8f0;
+    }
+
+/* --- Footer --- */
+footer {
+    border-top: 1px solid var(--border);
+    padding: 4rem 2rem;
+    margin-top: 8rem;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-dim);
+}
+
+.socials a {
+    color: var(--text-dim);
+    margin-left: 1.5rem;
+    text-decoration: none;
+}
+
+    .socials a:hover {
+        color: var(--accent);
+    }
+
+/* --- Responsive Design --- */
+@media (max-width: 900px) {
+    .featured-grid, .about-content {
+        grid-template-columns: 1fr;
+    }
+
+    .hero h1 {
+        font-size: 3rem;
+    }
+}
+/* Container for the images */
+.card-image-container {
+    position: relative;
+    width: 100%;
+    height: 240px;
+    z-index: 0;
+    overflow: hidden;
+    background: #020617;
+    border-bottom: 1px solid var(--border);
+}
+
+/* Slick 9's cover is square, so it needs a taller banner */
+.slick9 .card-image-container {
+    height: 340px;
+}
+
+    /* Bias the crop upward so the full SLICK9 title stays visible */
+    .slick9 .card-image-container img {
+        object-position: center top;
+    }
+
+    /* Base style for both images */
+    .card-image-container img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Keeps aspect ratio clean */
+        transition: opacity 0.4s ease-in-out;
+    }
+
+/* Static image is always visible by default */
+.static-img {
+    opacity: 1;
+    z-index: 2;
+}
+
+/* GIF is hidden by default */
+.hover-gif {
+    opacity: 0;
+    z-index: 1;
+}
+
+/* HOVER LOGIC: Hide static, show GIF */
+.project-card:hover .static-img,
+.mini-card:hover .static-img {
+    opacity: 0;
+}
+
+.project-card:hover .hover-gif,
+.mini-card:hover .hover-gif {
+    opacity: 1;
+}
+
+/* Mobile Fix: Since there is no 'hover' on phones, 
+   we keep the GIF hidden to save the user's data/battery 
+   OR you can choose to show only the static image. */
+@media (max-width: 768px) {
+    .hover-gif {
+        display: none; /* Disables GIFs on mobile for performance */
+    }
+
+    .static-img {
+        opacity: 1 !important;
+    }
+}
+.code-block {
+    background: #020617;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+}
+
+    .code-block pre {
+        margin: 0;
+        white-space: pre; /* Essential for code formatting */
+        font-family: 'Fira Code', monospace;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        color: #e2e8f0;
+    }
+
+.subtitle {
+    color: var(--accent);
+    font-weight: 700;
+    font-family: 'Fira Code', monospace;
+    margin-bottom: 1rem;
+}
+
+.intro-text {
+    max-width: 700px;
+    margin: 0 auto 3rem;
+    color: var(--text-dim);
+}
+/* --- Showcase Layout Fixes --- */
+.showcase-item {
+    margin-bottom: 6rem;
+}
+
+.showcase-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.showcase-number {
+    color: var(--accent);
+    font-family: 'Fira Code', monospace;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.showcase-video {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 2rem;
+}
+
+.problem-solution {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* This creates the two columns */
+    gap: 3rem;
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+    .problem-solution h3 {
+        color: var(--accent);
+        font-size: 1rem;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    .problem-solution p {
+        color: var(--text-dim);
+        font-size: 0.95rem;
+    }
+
+/* Fix for detail page alignment */
+.detail-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.code-spotlight h4 {
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .problem-solution {
+        grid-template-columns: 1fr; /* Stacks them on mobile */
+    }
+}
+/* Container for the code and the toggle button */
+.code-container {
+    position: relative;
+    margin: 1.5rem 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-darker);
+    overflow: hidden;
+}
+
+.code-block {
+    max-height: 300px; /* How much code to show by default */
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 1.5rem;
+}
+
+/* The "Fade" overlay for collapsed state */
+.code-container.collapsed::after {
+    content: "";
+    position: absolute;
+    bottom: 45px; /* Sits right above the button */
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background: linear-gradient(transparent, var(--bg-darker));
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+/* Hide fade when expanded */
+.code-container.expanded::after {
+    opacity: 0;
+}
+
+.expand-btn {
+    width: 100%;
+    padding: 0.8rem;
+    background: var(--card-bg);
+    border: none;
+    border-top: 1px solid var(--border);
+    color: var(--accent);
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+    .expand-btn:hover {
+        background: #2d3748;
+        color: var(--text-main);
+    }
+
+.lang-switcher {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: 1rem;
+    border-left: 1px solid var(--border);
+    padding-left: 1rem;
+}
+
+    .lang-switcher button {
+        background: transparent;
+        border: none;
+        color: var(--text-dim);
+        font-family: 'Fira Code', monospace;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+        .lang-switcher button:hover {
+            color: var(--accent);
+        }
+
+/* Language Transition Animation */
+.lang-transition {
+    opacity: 0;
+    transform: translateY(5px);
+    /* Optional: A subtle gold pulse as it disappears */
+    /* filter: drop-shadow(0 0 10px var(--accent));*/
+}
+
+/* Ensure the main content has a base transition */
+main, header {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.project-date {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-family: 'Fira Code', monospace;
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
+}
+
+/* For the small cards */
+.mini-card .project-date {
+    font-size: 0.7rem;
+    margin-bottom: 0.25rem;
+}
+.social-links-sidebar {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+    .social-links-sidebar a {
+        color: var(--accent);
+        text-decoration: none;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.8rem;
+    }
+
+        .social-links-sidebar a:hover {
+            text-decoration: underline;
+        }
+
+/* About Me Header with Photo */
+.about-profile-header {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    margin-bottom: 4rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.profile-photo-container {
+    flex-shrink: 0;
+    width: 200px;
+    height: 200px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+}
+
+.profile-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-intro h1 {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .about-profile-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+}
+
+/* Stats Grid for Detail Pages */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    max-width: 600px;
+    margin: 2rem auto;
+}
+
+.stat-card {
+    background: var(--bg-darker);
+    border: 1px solid var(--border);
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+    .stat-card span {
+        display: block;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: var(--accent); /* Blue/Cyan */
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-card strong {
+        font-size: 0.9rem;
+        color: var(--text-main);
+    }
+
+.external-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 4rem;
+}
+
+@media (max-width: 600px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* Container for the image/video */
+.showcase-visual {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+}
+
+.video-wrapper {
+    position: relative;
+    max-width: 750px;
+    width: 100%;
+}
+
+.sound-toggle {
+    position: absolute;
+    bottom: 0.75rem;
+    right: 0.75rem;
+    background: rgba(2, 6, 23, 0.75);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-main);
+    font-size: 1.1rem;
+    width: 2.4rem;
+    height: 2.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 10;
+}
+
+.sound-toggle:hover {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: var(--accent);
+}
+
+/* Team Credits Block */
+.team-credits {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    margin: 2rem auto 0;
+    max-width: 600px;
+    padding: 1.25rem 1.5rem;
+    background: var(--bg-darker);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+.credits-label {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--accent);
+    letter-spacing: 1px;
+    white-space: nowrap;
+    padding-top: 0.15rem;
+}
+
+.credits-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.credit-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.credit-role {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+.credit-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+.credit-link {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.credit-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    .team-credits {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .credit-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.15rem;
+    }
+}
+
+/* The actual image/video element */
+.showcase-video {
+    width: 100%;
+    max-width: 750px; /* Limits the "huge" feel */
+    height: auto;
+    max-height: 500px; /* Prevents vertical images from being too tall */
+    object-fit: contain; /* Ensures the image isn't cropped */
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-darker); /* Adds a background for transparent images */
+}
