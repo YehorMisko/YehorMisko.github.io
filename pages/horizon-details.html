@@ -22,6 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
         .showcase-visual.stacked { flex-direction: column; align-items: center; }
+        .capture-note { color:var(--text-dim); font-size:0.92rem; max-width:900px; margin:0 auto 2.5rem; text-align:center; }
         .video-caption { color:var(--text-dim); font-size:0.9rem; max-width:900px; margin:0.5rem 0 1.6rem; }
         /* NDA-gated code slot styling (scoped to this page) */
         .locked-slot {
@@ -87,18 +88,22 @@
 
         <section class="breakdown">
 
+            <p class="capture-note" data-i18n="horizon_capture_note">Every system below is server-authoritative, and every clip is a live session with two connected players, recorded from both windows at once.</p>
+
+
             <div class="showcase-item">
                 <div class="showcase-header">
                     <span class="showcase-number">01</span>
                     <h2 data-i18n="horizon_s1_title">Modular Clothing &amp; a 195-Item Content Database</h2>
                 </div>
 
-                <div class="showcase-visual">
+                <div class="showcase-visual stacked">
                     <div class="video-wrapper">
                         <!-- Owner-approved feature footage: wardrobe / clothing swap. -->
                         <video autoplay muted loop playsinline class="showcase-video" poster="../assets/images/horizon-static.jpg">
                             <source src="../assets/videos/horizon-clothing.mp4" type="video/mp4">
                         </video>                    </div>
+                    <p class="video-caption" data-i18n="horizon_cap_clothing">Clothing equipped on one character shows up on the other player's screen as it goes on, and it is still there after a save and reload.</p>
                 </div>
 
                 <div class="problem-solution">
@@ -119,12 +124,13 @@
                     <h2 data-i18n="horizon_s2_title">Skill Tree &amp; Progression</h2>
                 </div>
 
-                <div class="showcase-visual">
+                <div class="showcase-visual stacked">
                     <div class="video-wrapper">
                         <!-- Owner-approved feature footage: open skill menu → acquire a perk → effect → replicated on a 2nd client. -->
                         <video autoplay muted loop playsinline class="showcase-video" poster="../assets/images/horizon-static.jpg">
                             <source src="../assets/videos/horizon-skilltree.mp4" type="video/mp4">
                         </video>                    </div>
+                    <p class="video-caption" data-i18n="horizon_cap_skilltree">Kills feed the XP economy: the character starts at level 0 with nothing unlocked and ends at level 1 with points to spend and a perk taken in the tree, which is still there after a save and reload.</p>
                 </div>
 
                 <div class="problem-solution">
@@ -152,14 +158,14 @@
                             <source src="../assets/videos/horizon-vehicles.mp4" type="video/mp4">
                         </video>
                     </div>
-                    <p class="video-caption">Two connected clients on a dedicated server, so neither window has authority: everything here went through the server. The car takes damage, is destroyed, ejects its passenger and swaps to a burnt state, and both windows show it. The titles read <code>NetMode: Client 1</code> and <code>Client 2</code>.</p>
+                    <p class="video-caption" data-i18n="horizon_cap_destruction">The car takes damage, is destroyed, ejects its passenger and swaps to a burnt state, and both windows show it.</p>
 
                     <div class="video-wrapper">
                         <video autoplay muted loop playsinline class="showcase-video" poster="../assets/images/horizon-static.jpg">
                             <source src="../assets/videos/horizon-vehicle-storage.mp4" type="video/mp4">
                         </video>
                     </div>
-                    <p class="video-caption">The same vehicles carry their own storage. A rifle goes from the player inventory into the car trunk, then the game is saved, quit to the menu, and loaded again. The car is back in the same place with the rifle still in the trunk.</p>
+                    <p class="video-caption" data-i18n="horizon_cap_storage">The same vehicles carry their own storage. A rifle goes from the player inventory into the car trunk, then the game is saved, quit to the menu, and loaded again. The car is back in the same place with the rifle still in the trunk.</p>
                 </div>
 
                 <div class="problem-solution">

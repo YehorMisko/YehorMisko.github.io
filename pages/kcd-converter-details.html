@@ -154,11 +154,11 @@
                 </div>
                 <p class="shot-caption" data-i18n="kcd_note_scene">Same save, same location and view. The world and your position transfer deterministically; ambient NPCs run on live schedules the game re-simulates on every load (you'll see the same drift reloading a native PC save), so catching them in the exact same place, as here, currently takes a little luck. Full 1:1 moments do happen on some saves, and reducing that variance is ongoing work.</p>
 
-                <p style="color:var(--text-dim); font-size:0.9rem; max-width:820px; margin:0.75rem 0 0;">
+                <p style="color:var(--text-dim); font-size:0.9rem; max-width:820px; margin:0.75rem 0 0;" data-i18n="kcd_ai_note">
                     <strong>Built with AI assistance, stated plainly:</strong> the converter is around 970 Python files and every one of them was written with Claude Code, over roughly two months. What was mine was the method and the judgement, the hundreds of manual load tests (the only real oracle is running the game), devising the engine-diff comparison that broke the project open, and catching a silent data loss every automated check had passed: Henry came over from the Switch <em>drunk</em> and loaded on PC <em>sober</em>, a dropped 117-byte record that turned out to carry status effects. In one line: the AI wrote the code; I ran the experiments, chose what to measure, and caught what the code couldn't see.
                 </p>
 
-                <p style="color:var(--text-dim); font-size:0.9rem; max-width:820px; margin:0.5rem 0 0;">
+                <p style="color:var(--text-dim); font-size:0.9rem; max-width:820px; margin:0.5rem 0 0;" data-i18n="kcd_credit">
                     <strong>Credit where it's due:</strong> the container is CryEngine's <em>XMLCPB</em> serializer, whose source Crytek made public, reading it confirmed the outer format byte for byte. Pulling saves off the Switch uses <em>JKSV</em>. No prior Kingdom Come save tooling existed to build on.
                 </p>
 
@@ -202,7 +202,7 @@ broken   03 00 | 06 00 00 00 | 8b aa | 00 00 00 00 | 02 00 00 00 ff ff 7f 7f
 engine   03 00 | 16 00 00 00 | 8b aa | 10 00 00 00 | 02 00 00 00 ff ff 7f 7f
                   ^^ 6 + 8x2            ^^ 8x2       the same 16 bytes, framed</code></pre>
                     </div>
-                    <p style="color:var(--text-dim); font-size:0.92rem; max-width:820px; margin:1rem 0 0;">
+                    <p style="color:var(--text-dim); font-size:0.92rem; max-width:820px; margin:1rem 0 0;" data-i18n="kcd_spot_math">
                         <code>6 + 8&#215;2 = 22 = 0x16</code>, <code>8&#215;2 = 16 = 0x10</code>. Every save I had at
                         the time held <code>N = 0</code>, so both lengths sat at their empty values and read as part
                         of the constant. The emitter kept writing that empty-case header and appending the pairs
