@@ -3,6 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gameplay and systems programmer in Zhytomyr, Ukraine. PhD candidate researching replication in game engines. Available for contract work, part-time or full-time.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Yehor Misko">
+    <meta property="og:url" content="https://yehormisko.github.io/AboutMe.html">
+    <meta property="og:title" content="About Yehor Misko">
+    <meta property="og:description" content="Gameplay and systems programmer in Zhytomyr, Ukraine. PhD candidate researching replication in game engines. Available for contract work, part-time or full-time.">
+    <meta property="og:image" content="https://yehormisko.github.io/assets/images/og-card.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <title>About Me | Yehor Misko</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Fira+Code&display=swap" rel="stylesheet">
@@ -39,7 +53,7 @@
         <div class="about-content">
             <div class="text-block">
                 <h3 data-i18n="about_path_title">Current Work & Education</h3>
-                <p data-i18n="about_path_1">I teach Computer Science labs and practicals at Zhytomyr Ivan Franko State University, a part-time teaching load, and I'm a <strong>PhD candidate</strong> there. My research area is replication in game engines, the same problem space as the server-authoritative multiplayer I built into Project Horizon. Neither is a heavy load and my schedule is built around project work: <strong>I'm available now for contract work, part-time or full-time.</strong></p>
+                <p data-i18n="about_path_1">I teach Computer Science labs and practicals at Zhytomyr Ivan Franko State University, a part-time teaching load, and I'm a <strong>PhD candidate</strong> there. Neither is a heavy load and my schedule is built around project work: <strong>I'm available now for contract work, part-time or full-time.</strong></p>
 
                 <p data-i18n="about_path_2">I spent over two years as a programmer on <strong>Project Horizon</strong>. Most of that work was taking systems that were never built to talk to each other, a survival framework and a stack of marketplace plugins, and making them behave like one game in networked multiplayer.</p>
 
@@ -94,32 +108,32 @@
 
     <script src="translations.js"></script>
     <script>
+        function applyLanguage(lang) {
+            if (!translations[lang]) return;
+            localStorage.setItem('preferredLang', lang);
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) el.innerHTML = translations[lang][key];
+            });
+
+            document.querySelectorAll('.lang-switcher button').forEach(btn => {
+                btn.style.color = btn.textContent.toLowerCase().replace('cz','cs') === lang ? 'var(--accent)' : 'var(--text-dim)';
+            });
+        }
+
+        // Clicking a language fades the page out and back in. Loading it does not.
         function setLanguage(lang) {
-            const mainContent = document.querySelector('main');
-            mainContent.classList.add('lang-transition');
-
+            const panels = [document.querySelector('main')].filter(Boolean);
+            panels.forEach(p => p.classList.add('lang-transition'));
             setTimeout(() => {
-                localStorage.setItem('preferredLang', lang);
-                if (!translations[lang]) return;
-
-                document.querySelectorAll('[data-i18n]').forEach(element => {
-                    const key = element.getAttribute('data-i18n');
-                    if (translations[lang][key]) {
-                        element.innerHTML = translations[lang][key];
-                    }
-                });
-
-                document.querySelectorAll('.lang-switcher button').forEach(btn => {
-                    btn.style.color = btn.textContent.toLowerCase().replace('cz','cs') === lang ? 'var(--accent)' : 'var(--text-dim)';
-                });
-
-                mainContent.classList.remove('lang-transition');
+                applyLanguage(lang);
+                panels.forEach(p => p.classList.remove('lang-transition'));
             }, 300);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const savedLang = localStorage.getItem('preferredLang') || 'en';
-            setLanguage(savedLang);
+            applyLanguage(localStorage.getItem('preferredLang') || 'en');
         });
     </script>
 </body>

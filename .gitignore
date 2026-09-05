@@ -17,3 +17,7 @@ assets/videos/Sequence 01_5.mp4
 
 # Stray local files
 err.log
+
+# Local card previews, not part of the site
+_card-preview/
+_pfp/

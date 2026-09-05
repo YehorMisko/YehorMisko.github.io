@@ -3,10 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Two years turning a survival framework and marketplace plugins into one networked game: clothing, skill tree, vehicles, and server-authoritative multiplayer in UE5.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Yehor Misko">
+    <meta property="og:url" content="https://yehormisko.github.io/pages/horizon-details.html">
+    <meta property="og:title" content="Project Horizon Deep Dive | Yehor Misko">
+    <meta property="og:description" content="Two years turning a survival framework and marketplace plugins into one networked game: clothing, skill tree, vehicles, and server-authoritative multiplayer in UE5.">
+    <meta property="og:image" content="https://yehormisko.github.io/assets/images/og-card.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <title>Project Horizon Deep Dive | Yehor Misko</title>
     <link rel="stylesheet" href="../style.css">
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        .showcase-visual.stacked { flex-direction: column; align-items: center; }
+        .video-caption { color:var(--text-dim); font-size:0.9rem; max-width:900px; margin:0.5rem 0 1.6rem; }
         /* NDA-gated code slot styling (scoped to this page) */
         .locked-slot {
             background: var(--bg-darker);
@@ -129,12 +145,21 @@
                     <h2 data-i18n="horizon_s3_title">Vehicles: Integration, Destruction &amp; Persistence</h2>
                 </div>
 
-                <div class="showcase-visual">
+                <div class="showcase-visual stacked">
+                    <!-- Owner-approved footage. Two PIE clients on a dedicated server, no listen-server host. -->
                     <div class="video-wrapper">
-                        <!-- Owner-approved feature footage: drive → destruction across clients → save/reload persists. -->
                         <video autoplay muted loop playsinline class="showcase-video" poster="../assets/images/horizon-static.jpg">
                             <source src="../assets/videos/horizon-vehicles.mp4" type="video/mp4">
-                        </video>                    </div>
+                        </video>
+                    </div>
+                    <p class="video-caption">Two connected clients on a dedicated server, so neither window has authority: everything here went through the server. The car takes damage, is destroyed, ejects its passenger and swaps to a burnt state, and both windows show it. The titles read <code>NetMode: Client 1</code> and <code>Client 2</code>.</p>
+
+                    <div class="video-wrapper">
+                        <video autoplay muted loop playsinline class="showcase-video" poster="../assets/images/horizon-static.jpg">
+                            <source src="../assets/videos/horizon-vehicle-storage.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                    <p class="video-caption">The same vehicles carry their own storage. A rifle goes from the player inventory into the car trunk, then the game is saved, quit to the menu, and loaded again. The car is back in the same place with the rifle still in the trunk.</p>
                 </div>
 
                 <div class="problem-solution">

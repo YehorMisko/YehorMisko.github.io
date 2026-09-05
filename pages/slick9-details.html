@@ -3,6 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A custom UE4 character movement component with wallrunning, slope-driven momentum, and runtime shape-shifting, built in 9 days.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Yehor Misko">
+    <meta property="og:url" content="https://yehormisko.github.io/pages/slick9-details.html">
+    <meta property="og:title" content="Slick 9 Deep Dive | Yehor Misko">
+    <meta property="og:description" content="A custom UE4 character movement component with wallrunning, slope-driven momentum, and runtime shape-shifting, built in 9 days.">
+    <meta property="og:image" content="https://yehormisko.github.io/assets/images/og-card.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <title>Slick 9 Deep Dive | Yehor Misko</title>
     <link rel="stylesheet" href="../style.css">
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;700&display=swap" rel="stylesheet">
@@ -26,34 +40,34 @@
     </nav>
 
     <main class="detail-page">
-        <a href="../index.html" class="back-link">← Back to Gallery</a>
+        <a href="../index.html" class="back-link" data-i18n="back_gallery">← Back to Gallery</a>
 
         <header class="detail-header">
-            <h1>Slick 9: Rapid Prototype Architecture</h1>
-            <p class="subtitle">9 Days | 4 Developers | Role: Gameplay Programmer</p>
-            <p class="intro-text">
+            <h1 data-i18n="s9_title">Slick 9: Rapid Prototype Architecture</h1>
+            <p class="subtitle" data-i18n="s9_subtitle">9 Days | 4 Developers | Role: Gameplay Programmer | UE4 · C++</p>
+            <p class="intro-text" data-i18n="s9_intro">
                 Nine days, four people, and a movement system as the whole point of the game. My goal was
                 traversal that stayed responsive at speed, built so the movement code stayed separate enough
                 from the jam content that we could keep working on it afterwards.
             </p>
 
             <div class="team-credits">
-                <span class="credits-label">Team</span>
+                <span class="credits-label" data-i18n="s9_team_label">Team</span>
                 <div class="credits-list">
                     <div class="credit-item">
-                        <span class="credit-role">Gameplay Programming &amp; Systems</span>
+                        <span class="credit-role" data-i18n="s9_role_prog">Gameplay Programming &amp; Systems</span>
                         <span class="credit-name">Yehor Misko</span>
                     </div>
                     <div class="credit-item">
-                        <span class="credit-role">Level &amp; Game Design, Custom Materials</span>
+                        <span class="credit-role" data-i18n="s9_role_design">Level &amp; Game Design, Custom Materials</span>
                         <a href="https://www.artstation.com/wolmance" target="_blank" class="credit-name credit-link">Wolmance</a>
                     </div>
                     <div class="credit-item">
-                        <span class="credit-role">3D Props</span>
+                        <span class="credit-role" data-i18n="s9_role_props">3D Props</span>
                         <a href="https://www.artstation.com/sofiia_larchenkova" target="_blank" class="credit-name credit-link">Sofiia Larchenkova</a>
                     </div>
                     <div class="credit-item">
-                        <span class="credit-role">Soundtrack</span>
+                        <span class="credit-role" data-i18n="s9_role_music">Soundtrack</span>
                         <a href="https://www.youtube.com/@veroowem/videos" target="_blank" class="credit-name credit-link">Vero Owem</a>
                     </div>
                 </div>
@@ -64,7 +78,7 @@
             <div class="showcase-item">
                 <div class="showcase-header">
                     <span class="showcase-number">01</span>
-                    <h2>Momentum-Preserving Wallrun & Traversal</h2>
+                    <h2 data-i18n="s9_s1_title">Momentum-Preserving Wallrun & Traversal</h2>
                 </div>
 
                 <div class="showcase-visual">
@@ -78,19 +92,19 @@
 
                 <div class="problem-solution">
                     <div class="col">
-                        <h3>The Challenge</h3>
-                        <p>Unreal's default collision physics kills kinetic energy on wall impact. Under jam time constraints, I needed wallrunning that preserved momentum and chained into jumps, without the complexity of a full custom movement state and its replicated physics overhead.</p>
+                        <h3 data-i18n="challenge_label">The Challenge</h3>
+                        <p data-i18n="s9_s1_challenge">Unreal's default collision physics kills kinetic energy on wall impact. Under jam time constraints, I needed wallrunning that preserved momentum and chained into jumps, without the complexity of a full custom movement state and its replicated physics overhead.</p>
                     </div>
                     <div class="col">
-                        <h3>The Solution</h3>
-                        <p>I subclassed <code>UCharacterMovementComponent</code> and overrode <code>OnMovementUpdated</code> to run a wall scan every tick while <code>IsFalling()</code>. The character never leaves the standard falling state. Wallrun physics are applied as velocity corrections: a <strong>Dot Product</strong> validates wall angle, a <strong>Cross Product</strong> finds the forward tangent, and pre-impact speed from <code>OldVelocity</code> is forcefully restored.</p>
+                        <h3 data-i18n="solution_label">The Solution</h3>
+                        <p data-i18n="s9_s1_solution">I subclassed <code>UCharacterMovementComponent</code> and overrode <code>OnMovementUpdated</code> to run a wall scan every tick while <code>IsFalling()</code>. The character never leaves the standard falling state. Wallrun physics are applied as velocity corrections: a <strong>Dot Product</strong> validates wall angle, a <strong>Cross Product</strong> finds the forward tangent, and pre-impact speed from <code>OldVelocity</code> is forcefully restored.</p>
                     </div>
                 </div>
 
                 
 
                 <div class="code-spotlight">
-                    <h4>Full Implementation (C++)</h4>
+                    <h4 data-i18n="s9_code_full">Full Implementation (C++)</h4>
                     <div class="code-container collapsed">
                         <div class="code-block">
 <pre><code class="language-cpp">// --- 1. ENTRY & MEMORY CHECKS ---
@@ -151,7 +165,7 @@ if (bIsWallRunning)
     WallRunCooldown = Stat_WallRunCooldown;   // brief lockout before we can re-attach
 }</code></pre>
                         </div>
-                        <button class="expand-btn" onclick="toggleCode(this)">Show Full Code</button>
+                        <button class="expand-btn" onclick="toggleCode(this)" data-i18n="code_show">Show Full Code</button>
                     </div>
                 </div>
             </div>
@@ -159,7 +173,7 @@ if (bIsWallRunning)
             <div class="showcase-item">
                 <div class="showcase-header">
                     <span class="showcase-number">02</span>
-                    <h2>Data-Driven Slope Physics & Momentum Decay</h2>
+                    <h2 data-i18n="s9_s2_title">Data-Driven Slope Physics & Momentum Decay</h2>
                 </div>
 
                 <div class="showcase-visual">
@@ -173,19 +187,19 @@ if (bIsWallRunning)
 
                 <div class="problem-solution">
                     <div class="col">
-                        <h3>The Challenge</h3>
-                        <p>Standard Unreal movement is static on inclines. Additionally, exceeding <code>MaxWalkSpeed</code> violently clamps velocity, killing flow. I needed level geometry to actively dictate pacing while keeping physics parameters data-driven.</p>
+                        <h3 data-i18n="challenge_label">The Challenge</h3>
+                        <p data-i18n="s9_s2_challenge">Standard Unreal movement is static on inclines. On top of that, exceeding <code>MaxWalkSpeed</code> violently clamps velocity, killing flow. I needed level geometry to actively dictate pacing while keeping physics parameters data-driven.</p>
                     </div>
                     <div class="col">
-                        <h3>The Solution</h3>
-                        <p>I wrote a state-aware Master Speed Manager. For slope physics, the system projects <code>DownVector</code> against <code>FloorNormal</code>. I built a <strong>"Soft Cap"</strong> system using <code>FMath::FInterpConstantTo</code> to allow excess momentum to naturally decay.</p>
+                        <h3 data-i18n="solution_label">The Solution</h3>
+                        <p data-i18n="s9_s2_solution">I wrote a state-aware Master Speed Manager. For slope physics, the system projects <code>DownVector</code> against <code>FloorNormal</code>. I built a <strong>"Soft Cap"</strong> system using <code>FMath::FInterpConstantTo</code> to allow excess momentum to naturally decay.</p>
                     </div>
                 </div>
 
                 
 
                 <div class="code-spotlight">
-                    <h4>Implementation Breakdown (C++)</h4>
+                    <h4 data-i18n="s9_code_breakdown">Implementation Breakdown (C++)</h4>
                     <div class="code-container collapsed">
                         <div class="code-block">
 <pre><code class="language-cpp">// --- MASTER SPEED & SLIDE MANAGER (runs every tick in OnMovementUpdated) ---
@@ -246,7 +260,7 @@ else
     MaxWalkSpeedCrouched = Stat_CrouchWalkSpeed;
 }</code></pre>
                         </div>
-                        <button class="expand-btn" onclick="toggleCode(this)">Show Full Code</button>
+                        <button class="expand-btn" onclick="toggleCode(this)" data-i18n="code_show">Show Full Code</button>
                     </div>
                 </div>
             </div>
@@ -254,7 +268,7 @@ else
             <div class="showcase-item">
                 <div class="showcase-header">
                     <span class="showcase-number">03</span>
-                    <h2>Runtime Shape-Shifting & Spatial Validation</h2>
+                    <h2 data-i18n="s9_s3_title">Runtime Shape-Shifting & Spatial Validation</h2>
                 </div>
 
                 <div class="showcase-visual">
@@ -268,19 +282,19 @@ else
 
                 <div class="problem-solution">
                     <div class="col">
-                        <h3>The Challenge</h3>
-                        <p>Dynamically modifying collision geometry is prone to bugs. Transforming into a larger horse entity inside tight corridors can push players out of bounds or crash the movement state.</p>
+                        <h3 data-i18n="challenge_label">The Challenge</h3>
+                        <p data-i18n="s9_s3_challenge">Dynamically modifying collision geometry is prone to bugs. Transforming into a larger horse entity inside tight corridors can push players out of bounds or crash the movement state.</p>
                     </div>
                     <div class="col">
-                        <h3>The Solution</h3>
-                        <p>I wrote a <strong>predictive spatial validation</strong> system using <code>OverlapBlockingTestByChannel</code>. Transformations are safely denied if clearance is insufficient, and state sanitization prevents conflicting physics states.</p>
+                        <h3 data-i18n="solution_label">The Solution</h3>
+                        <p data-i18n="s9_s3_solution">I wrote a <strong>predictive spatial validation</strong> system using <code>OverlapBlockingTestByChannel</code>. Transformations are safely denied if clearance is insufficient, and state sanitization prevents conflicting physics states.</p>
                     </div>
                 </div>
 
                 
 
                 <div class="code-spotlight">
-                    <h4>Implementation Breakdown (C++)</h4>
+                    <h4 data-i18n="s9_code_breakdown">Implementation Breakdown (C++)</h4>
                     <div class="code-container collapsed">
                         <div class="code-block">
 <pre><code class="language-cpp">// --- 1. THE SPATIAL VALIDATION CHECK ---
@@ -331,7 +345,7 @@ void AJKAInspCharacter::ToggleHorse(bool bNewState)
     }
 }</code></pre>
                         </div>
-                        <button class="expand-btn" onclick="toggleCode(this)">Show Full Code</button>
+                        <button class="expand-btn" onclick="toggleCode(this)" data-i18n="code_show">Show Full Code</button>
                     </div>
                 </div>
             </div>
@@ -367,6 +381,12 @@ void AJKAInspCharacter::ToggleHorse(bool bNewState)
         }
     }
 
+    // Keeps the expand button's label in whatever language the page is showing.
+    function t(key, fallback) {
+        const lang = localStorage.getItem('preferredLang') || 'en';
+        return (window.translations && translations[lang] && translations[lang][key]) || fallback;
+    }
+
     function toggleCode(button) {
         const container = button.parentElement;
         const codeBlock = button.previousElementSibling;
@@ -374,11 +394,11 @@ void AJKAInspCharacter::ToggleHorse(bool bNewState)
         if (container.classList.contains('collapsed')) {
             container.classList.remove('collapsed');
             codeBlock.style.maxHeight = codeBlock.scrollHeight + "px";
-            button.textContent = "Show Less";
+            button.textContent = t('code_less', "Show Less");
         } else {
             container.classList.add('collapsed');
             codeBlock.style.maxHeight = "250px";
-            button.textContent = "Show Full Code";
+            button.textContent = t('code_show', "Show Full Code");
             codeBlock.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
     }

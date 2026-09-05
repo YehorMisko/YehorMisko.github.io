@@ -3,6 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="C++ and Unreal Engine gameplay programmer. Two years of networked gameplay as a contract programmer, a jam prototype built in 9 days, and a Switch save format reverse-engineered from nothing.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Yehor Misko">
+    <meta property="og:url" content="https://yehormisko.github.io/">
+    <meta property="og:title" content="Yehor Misko | Gameplay &amp; Systems Programmer">
+    <meta property="og:description" content="C++ and Unreal Engine gameplay programmer. Two years of networked gameplay as a contract programmer, a jam prototype built in 9 days, and a Switch save format reverse-engineered from nothing.">
+    <meta property="og:image" content="https://yehormisko.github.io/assets/images/og-card.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <title>Yehor Misko | Gameplay &amp; Systems Programmer</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Fira+Code&display=swap" rel="stylesheet">
@@ -28,7 +42,7 @@
 
     <header class="hero">
         <h1 data-i18n="hero_title">Gameplay &amp; Systems Programmer</h1>
-        <p data-i18n="hero_desc">C++ / Unreal Engine 5. Two years of networked gameplay as a contract programmer, a jam prototype built in 9 days, and a Switch save format reverse-engineered from nothing.</p>
+        <p data-i18n="hero_desc">C++ / Unreal Engine. Two years of networked gameplay as a contract programmer, a jam prototype built in 9 days, and a Switch save format reverse-engineered from nothing.</p>
         <p class="hero-available">
             <span class="avail-dot"></span>
             <span data-i18n="hero_available">Available now for contract work, part-time or full-time.</span>
@@ -40,8 +54,8 @@
     <section class="featured-grid">
         <div class="project-card large horizon">
             <div class="card-image-container">
-                <img src="assets/images/horizon-static.jpg" class="static-img" alt="Project Horizon Static">
-                <img src="assets/images/horizon-preview.gif" class="hover-gif" loading="lazy" alt="Project Horizon Gameplay">
+                <img src="assets/images/horizon-static.jpg" class="static-img" alt="Project Horizon title card">
+                <img src="assets/images/horizon-preview.gif" class="hover-gif" loading="lazy" alt="Project Horizon gameplay footage">
             </div>
             <div class="card-content">
                 <span class="badge" data-i18n="horizon_badge">2-Year Freelance Programmer</span>
@@ -54,14 +68,14 @@
 
         <div class="project-card large slick9">
             <div class="card-image-container">
-                <img src="assets/images/slick9-static.png" class="static-img" loading="lazy" alt="Slick 9 Static">
-                <img src="assets/images/slick9-preview.gif" class="hover-gif" alt="Slick 9 Gameplay">
+                <img src="assets/images/slick9-static.png" class="static-img" loading="lazy" alt="Slick 9 title card">
+                <img src="assets/images/slick9-preview.gif" class="hover-gif" alt="Slick 9 movement gameplay footage">
             </div>
             <div class="card-content">
                 <span class="badge highlight" data-i18n="slick9_badge">9-Day Game Jam</span>
                 <span class="project-date">February 2026</span>
                 <h2 data-i18n="slick9_title">Slick 9</h2>
-                <p data-i18n="slick9_desc">Movement-focused prototype. A custom character movement component with wallrunning, slope-driven momentum, and runtime shape-shifting, built in 9 days.</p>
+                <p data-i18n="slick9_desc">Movement-focused prototype. A custom UE4 character movement component with wallrunning, slope-driven momentum, and runtime shape-shifting, built in 9 days.</p>
                 <a href="pages/slick9-details.html" class="btn-secondary" data-i18n="view_deep_dive">View Deep Dive</a>
             </div>
         </div>      
@@ -113,42 +127,33 @@
 
     <script src="translations.js"></script>
     <script>
+        function applyLanguage(lang) {
+            if (!translations[lang]) return;
+            localStorage.setItem('preferredLang', lang);
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) el.innerHTML = translations[lang][key];
+            });
+
+            document.querySelectorAll('.lang-switcher button').forEach(btn => {
+                btn.style.color = btn.textContent.toLowerCase().replace('cz','cs') === lang ? 'var(--accent)' : 'var(--text-dim)';
+            });
+        }
+
+        // Clicking a language fades the page out and back in. Loading it does not.
         function setLanguage(lang) {
-    const mainContent = document.querySelector('main');
-    const heroContent = document.querySelector('header');
+            const panels = [document.querySelector('header'), document.querySelector('main')].filter(Boolean);
+            panels.forEach(p => p.classList.add('lang-transition'));
+            setTimeout(() => {
+                applyLanguage(lang);
+                panels.forEach(p => p.classList.remove('lang-transition'));
+            }, 300);
+        }
 
-    // 1. Start the Fade-Out
-    mainContent.classList.add('lang-transition');
-    heroContent.classList.add('lang-transition');
-
-    // 2. Wait for animation (300ms) before swapping text
-    setTimeout(() => {
-        localStorage.setItem('preferredLang', lang);
-        
-        if (!translations[lang]) return;
-
-        document.querySelectorAll('[data-i18n]').forEach(element => {
-            const key = element.getAttribute('data-i18n');
-            if (translations[lang][key]) {
-                element.innerHTML = translations[lang][key];
-            }
+        document.addEventListener('DOMContentLoaded', () => {
+            applyLanguage(localStorage.getItem('preferredLang') || 'en');
         });
-
-        // Update button colors
-        document.querySelectorAll('.lang-switcher button').forEach(btn => {
-            btn.style.color = btn.textContent.toLowerCase().replace('cz','cs') === lang ? 'var(--accent)' : 'var(--text-dim)';
-        });
-
-        // 3. Fade Back In
-        mainContent.classList.remove('lang-transition');
-        heroContent.classList.remove('lang-transition');
-    }, 300);
-}
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const savedLang = localStorage.getItem('preferredLang') || 'en';
-        setLanguage(savedLang);
-    });
     </script>
 </body>
 </html>

@@ -412,16 +412,11 @@ footer {
 .card-image-container {
     position: relative;
     width: 100%;
-    height: 240px;
+    height: 280px;
     z-index: 0;
     overflow: hidden;
     background: #020617;
     border-bottom: 1px solid var(--border);
-}
-
-/* Slick 9's cover is square, so it needs a taller banner */
-.slick9 .card-image-container {
-    height: 340px;
 }
 
     /* Bias the crop upward so the full SLICK9 title stays visible */
@@ -436,7 +431,7 @@ footer {
         left: 0;
         width: 100%;
         height: 100%;
-        object-fit: cover; /* Keeps aspect ratio clean */
+        object-fit: cover;
         transition: opacity 0.4s ease-in-out;
     }
 
@@ -533,7 +528,7 @@ footer {
 
 .problem-solution {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* This creates the two columns */
+    grid-template-columns: 1fr 1fr;
     gap: 3rem;
     margin-bottom: 2rem;
     text-align: left;
@@ -565,7 +560,7 @@ footer {
 
 @media (max-width: 768px) {
     .problem-solution {
-        grid-template-columns: 1fr; /* Stacks them on mobile */
+        grid-template-columns: 1fr;
     }
 }
 /* Container for the code and the toggle button */
@@ -647,8 +642,6 @@ footer {
 .lang-transition {
     opacity: 0;
     transform: translateY(5px);
-    /* Optional: A subtle gold pulse as it disappears */
-    /* filter: drop-shadow(0 0 10px var(--accent));*/
 }
 
 /* Ensure the main content has a base transition */
