@@ -404,7 +404,7 @@ def cmd_set_res(args):
             });
         }
         document.addEventListener('DOMContentLoaded', () => {
-            setLanguage(localStorage.getItem('preferredLang') || 'en');
+            setLanguage(preferredLang());
         });
     </script>
 </body>

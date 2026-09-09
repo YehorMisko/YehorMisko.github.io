@@ -235,7 +235,7 @@
             });
         }
         document.addEventListener('DOMContentLoaded', () => {
-            setLanguage(localStorage.getItem('preferredLang') || 'en');
+            setLanguage(preferredLang());
         });
     </script>
 </body>

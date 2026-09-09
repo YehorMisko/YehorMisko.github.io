@@ -480,3 +480,12 @@ const translations = {
         horizon_scope_note: "Примітка щодо обсягу: Project Horizon побудований на фреймворку Survival Game Kit та комерційних marketplace-плагінах. Системи вище описують мою власну інтеграцію, мережевий код та контентну роботу поверх цих інструментів, а не авторство самих фреймворків.",
     }
 };
+
+// Language can be forced from the URL (?lang=cs, ?lang=uk, ?lang=en) so a link can
+// open the site already translated. Falls back to the visitor's last choice, then English.
+function preferredLang() {
+    const alias = { en: 'en', cs: 'cs', cz: 'cs', uk: 'uk', ua: 'uk' };
+    const asked = new URLSearchParams(location.search).get('lang');
+    if (asked && alias[asked.toLowerCase()]) return alias[asked.toLowerCase()];
+    return localStorage.getItem('preferredLang') || 'en';
+}
