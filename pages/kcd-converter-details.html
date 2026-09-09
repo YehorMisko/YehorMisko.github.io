@@ -280,7 +280,7 @@ engine   03 00 | 16 00 00 00 | 8b aa | 10 00 00 00 | 02 00 00 00 ff ff 7f 7f
             });
         }
         document.addEventListener('DOMContentLoaded', () => {
-            setLanguage(preferredLang());
+            setLanguage(typeof preferredLang === 'function' ? preferredLang() : (localStorage.getItem('preferredLang') || 'en'));
         });
     </script>
 </body>

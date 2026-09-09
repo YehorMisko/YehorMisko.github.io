@@ -152,7 +152,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            applyLanguage(preferredLang());
+            applyLanguage(typeof preferredLang === 'function' ? preferredLang() : (localStorage.getItem('preferredLang') || 'en'));
         });
     </script>
 </body>

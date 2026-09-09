@@ -420,7 +420,7 @@ void AJKAInspCharacter::ToggleHorse(bool bNewState)
             });
         }
         document.addEventListener('DOMContentLoaded', () => {
-            setLanguage(preferredLang());
+            setLanguage(typeof preferredLang === 'function' ? preferredLang() : (localStorage.getItem('preferredLang') || 'en'));
         });
     </script>
 </body>
